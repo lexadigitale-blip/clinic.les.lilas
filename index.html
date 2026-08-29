@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clinique Les Lilas — Entrez dans la clinique</title>
+<title>Clinique Les Lilas — Diagnostic médical</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,560;0,9..144,650;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -20,414 +20,644 @@
     --pink-50:#FEF6FA;
     --white:#FFFFFF;
     --ink:#2A1830;
+    --ink-soft:#6b5468;
     --ease:cubic-bezier(.22,1,.36,1);
-    --ease-in:cubic-bezier(.7,0,.84,0);
   }
+
   *{margin:0;padding:0;box-sizing:border-box;}
-  html,body{height:100%;overflow:hidden;}
+  html{scroll-behavior:smooth;}
   body{
     font-family:'Manrope',sans-serif;
-    background:var(--purple-950);
-    color:var(--white);
+    background:var(--pink-50);
+    color:var(--ink);
+    overflow-x:hidden;
     -webkit-font-smoothing:antialiased;
-    position:relative;
   }
   h1,h2,h3,.display{font-family:'Fraunces',serif;}
-  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
-  ::selection{background:var(--purple-600);color:#fff;}
+  a{color:inherit;text-decoration:none;}
+  ul{list-style:none;}
+  img{max-width:100%;display:block;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;}
+  ::selection{background:var(--purple-600);color:var(--white);}
 
   @media (prefers-reduced-motion: reduce){
-    *{animation-duration:.001ms !important;transition-duration:.001ms !important;}
+    *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important;}
   }
 
-  /* ---------- persistent brandmark ---------- */
-  .brandmark{
-    position:fixed;top:26px;left:30px;z-index:500;
-    display:flex;align-items:center;gap:10px;
-    font-family:'Fraunces',serif;font-weight:650;letter-spacing:.01em;
-    text-shadow:0 2px 14px rgba(0,0,0,.4);
-    pointer-events:none;
+  /* ---------- utility ---------- */
+  .wrap{max-width:1220px;margin:0 auto;padding:0 32px;}
+  .eyebrow{
+    font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--purple-600);font-weight:700;display:flex;align-items:center;gap:10px;
   }
-  .brandmark svg{width:26px;height:26px;flex-shrink:0;}
-  .brandmark span{font-size:.98rem;}
-  .brandmark small{display:block;font-family:'Manrope',sans-serif;font-weight:600;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;opacity:.75;}
+  .eyebrow::before{content:"";width:22px;height:2px;background:var(--purple-500);border-radius:2px;}
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease),transform .9s var(--ease);}
+  .reveal.in{opacity:1;transform:translateY(0);}
+  .reveal-scale{opacity:0;transform:scale(.94);transition:opacity .8s var(--ease),transform .8s var(--ease);}
+  .reveal-scale.in{opacity:1;transform:scale(1);}
+  .stagger .reveal:nth-child(1){transition-delay:.05s;}
+  .stagger .reveal:nth-child(2){transition-delay:.13s;}
+  .stagger .reveal:nth-child(3){transition-delay:.21s;}
+  .stagger .reveal:nth-child(4){transition-delay:.29s;}
+  .stagger .reveal:nth-child(5){transition-delay:.37s;}
+  .stagger .reveal:nth-child(6){transition-delay:.45s;}
+  .stagger .reveal:nth-child(7){transition-delay:.53s;}
+  .stagger .reveal:nth-child(8){transition-delay:.61s;}
 
-  /* ---------- flash overlay for the fly-through ---------- */
-  .flash{
-    position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:900;
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:15px 28px;border-radius:999px;font-weight:700;font-size:.95rem;
+    transition:transform .45s var(--ease), box-shadow .45s var(--ease), background .3s ease;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--purple-600),var(--purple-500));
+    color:var(--white);
+    box-shadow:0 10px 30px -8px rgba(139,44,107,.55);
+  }
+  .btn-primary:hover{transform:translateY(-3px);box-shadow:0 16px 36px -8px rgba(139,44,107,.65);}
+  .btn-ghost{
+    background:transparent;color:var(--purple-600);border:1.5px solid rgba(139,44,107,.35);
+  }
+  .btn-ghost:hover{background:rgba(139,44,107,.08);transform:translateY(-3px);}
+  .btn svg{width:16px;height:16px;transition:transform .4s var(--ease);}
+  .btn-primary:hover svg{transform:translateX(4px);}
+
+  /* ---------- clover mark (signature) ---------- */
+  .clover{width:34px;height:34px;flex-shrink:0;}
+  .clover .petal{transform-origin:center;animation:sway 7s ease-in-out infinite;}
+  .clover .petal:nth-child(2){animation-delay:.4s;}
+  .clover .petal:nth-child(3){animation-delay:.8s;}
+  .clover .petal:nth-child(4){animation-delay:1.2s;}
+  @keyframes sway{
+    0%,100%{transform:scale(1) rotate(0deg);}
+    50%{transform:scale(1.06) rotate(3deg);}
+  }
+
+  /* ---------- nav ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:200;
+    padding:18px 0;
+    transition:background .5s ease, box-shadow .5s ease, padding .4s ease;
+  }
+  header.scrolled{
+    background:rgba(26,15,31,.72);
+    backdrop-filter:blur(18px) saturate(150%);
+    box-shadow:0 8px 30px -12px rgba(0,0,0,.4);
+    padding:12px 0;
+  }
+  nav{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:12px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-text{display:flex;flex-direction:column;line-height:1.05;white-space:nowrap;}
+  .brand-text b{font-family:'Fraunces',serif;font-size:1.15rem;color:var(--white);font-weight:650;}
+  .brand-text span{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--pink-200);}
+  .nav-links{display:flex;align-items:center;gap:6px;position:relative;}
+  .nav-links a{
+    position:relative;padding:10px 18px;font-size:.92rem;font-weight:600;color:rgba(255,255,255,.82);
+    border-radius:999px;transition:color .3s ease;
+  }
+  .nav-links a:hover{color:#fff;}
+  .nav-links a.active{color:#fff;}
+  .nav-pill{
+    position:absolute;top:0;height:100%;border-radius:999px;
+    background:linear-gradient(135deg,var(--purple-600),var(--purple-500));
+    transition:left .5s var(--ease), width .5s var(--ease);
+    z-index:-1;
+  }
+  .nav-cta{display:flex;align-items:center;gap:18px;}
+  .nav-phone{display:flex;align-items:center;gap:8px;color:#fff;font-weight:700;font-size:.9rem;}
+  .nav-phone svg{width:16px;height:16px;color:var(--pink-300);}
+  .burger{display:none;width:26px;height:20px;position:relative;flex-direction:column;justify-content:space-between;}
+  .burger span{display:block;height:2px;background:#fff;border-radius:2px;transition:transform .35s var(--ease), opacity .3s ease;}
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;min-height:100svh;display:flex;align-items:center;
+    background:
+      radial-gradient(circle, rgba(255,255,255,.09) 1px, transparent 1.4px) 0 0/26px 26px,
+      radial-gradient(ellipse 90% 60% at 15% 0%, #3E1739 0%, var(--purple-950) 55%);
+    overflow:hidden;color:#fff;padding-top:110px;
+  }
+  .blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.55;animation:float 16s ease-in-out infinite;}
+  .blob1{width:520px;height:520px;background:radial-gradient(circle,var(--purple-500),transparent 70%);top:-160px;right:-120px;animation-duration:20s;}
+  .blob2{width:380px;height:380px;background:radial-gradient(circle,var(--pink-300),transparent 70%);bottom:-140px;right:20%;animation-duration:17s;animation-delay:-4s;}
+  .blob3{width:300px;height:300px;background:radial-gradient(circle,var(--purple-800),transparent 70%);top:30%;left:-100px;animation-duration:22s;animation-delay:-9s;}
+  @keyframes float{
+    0%,100%{transform:translate(0,0) scale(1);}
+    33%{transform:translate(30px,-40px) scale(1.08);}
+    66%{transform:translate(-25px,30px) scale(.95);}
+  }
+  .hero-grid{
+    position:relative;z-index:2;display:grid;grid-template-columns:1.1fr .9fr;gap:60px;align-items:center;width:100%;
+  }
+  .hero h1{
+    font-size:clamp(2.6rem,5.2vw,4.4rem);font-weight:650;line-height:1.06;letter-spacing:-.02em;
+  }
+  .hero h1 em{font-style:italic;font-weight:500;color:var(--pink-300);}
+  .hero p.lede{
+    margin-top:24px;font-size:1.15rem;line-height:1.65;color:rgba(255,255,255,.78);max-width:480px;
+  }
+  .hero-actions{display:flex;gap:16px;margin-top:38px;flex-wrap:wrap;}
+  .hero .btn-ghost{color:#fff;border-color:rgba(255,255,255,.35);}
+  .hero .btn-ghost:hover{background:rgba(255,255,255,.1);}
+
+  .stat-row{display:flex;gap:40px;margin-top:56px;flex-wrap:wrap;}
+  .stat b{font-family:'Fraunces',serif;font-size:2.1rem;font-weight:650;display:block;color:#fff;}
+  .stat span{font-size:.8rem;color:rgba(255,255,255,.6);letter-spacing:.03em;}
+
+  .hero-visual{position:relative;display:flex;align-items:center;justify-content:center;}
+  .card-stack{position:relative;width:100%;max-width:380px;aspect-ratio:1/1.05;}
+  .rx-card{
+    position:absolute;inset:0;border-radius:28px;
+    background:linear-gradient(155deg,rgba(255,255,255,.1),rgba(255,255,255,.02));
+    border:1px solid rgba(255,255,255,.14);
+    backdrop-filter:blur(14px);
+    animation:drift 8s ease-in-out infinite;
+  }
+  @keyframes drift{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-14px) rotate(1deg);}}
+  .rx-inner{position:absolute;inset:26px;background:#fff;border-radius:20px;color:var(--ink);padding:26px;box-shadow:0 30px 70px -20px rgba(0,0,0,.5);overflow:hidden;display:flex;flex-direction:column;}
+  .rx-inner .clover{width:30px;height:30px;}
+  .rx-inner .rx-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+  .rx-inner h4{font-family:'Fraunces',serif;font-size:1.02rem;font-weight:650;}
+  .rx-line{height:9px;border-radius:5px;background:var(--pink-100);margin-bottom:10px;}
+  .rx-line:nth-child(1){width:88%;}
+  .pulse-dot{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--purple-500);box-shadow:0 0 0 rgba(167,59,130,.5);animation:pulse 2.4s infinite;}
+  .pulse-dot.p1{top:-8px;right:60px;}
+  .pulse-dot.p2{bottom:20%;left:-10px;background:var(--pink-300);animation-delay:1s;}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(167,59,130,.55);}
+    70%{box-shadow:0 0 0 16px rgba(167,59,130,0);}
+    100%{box-shadow:0 0 0 0 rgba(167,59,130,0);}
+  }
+
+  .scroll-cue{
+    position:absolute;bottom:34px;left:50%;transform:translateX(-50%);
+    display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(255,255,255,.55);
+    font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;z-index:2;
+  }
+  .scroll-cue .line{width:1px;height:34px;background:linear-gradient(to bottom,rgba(255,255,255,.6),transparent);position:relative;overflow:hidden;}
+  .scroll-cue .line::after{content:"";position:absolute;top:-100%;left:0;width:100%;height:100%;background:#fff;animation:scrolldown 1.8s infinite;}
+  @keyframes scrolldown{0%{top:-100%;}100%{top:100%;}}
+
+  /* ---------- platforms strip ---------- */
+  .platforms{background:var(--white);padding:80px 0 60px;position:relative;}
+  .platform-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:40px;}
+  .platform-card{
+    padding:30px 26px;border-radius:22px;background:var(--pink-50);
+    border:1px solid rgba(139,44,107,.1);
+    transition:transform .5s var(--ease), box-shadow .5s var(--ease), background .4s ease;
+    position:relative;overflow:hidden;
+  }
+  .platform-card:hover{transform:translateY(-8px);box-shadow:0 22px 46px -18px rgba(139,44,107,.3);background:#fff;}
+  .platform-card .icon-badge{margin-bottom:18px;}
+  .platform-card h3{font-size:1.15rem;font-weight:650;margin-bottom:8px;}
+  .platform-card p{color:var(--ink-soft);font-size:.92rem;line-height:1.55;margin-bottom:16px;}
+  .platform-phone{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--purple-600);font-size:.92rem;}
+  .platform-phone svg{width:14px;height:14px;}
+
+  .icon-badge{
+    width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,var(--purple-600),var(--purple-500));color:#fff;
+  }
+  .icon-badge svg{width:24px;height:24px;stroke-width:1.7;}
+
+  /* ---------- services ---------- */
+  .services{background:var(--pink-50);padding:120px 0 160px;position:relative;overflow:hidden;}
+  .services-divider{position:absolute;left:0;right:0;bottom:-1px;line-height:0;}
+  .services-divider svg{width:100%;height:110px;display:block;}
+  .section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;margin-bottom:56px;flex-wrap:wrap;}
+  .section-head h2{font-size:clamp(2rem,3.6vw,2.9rem);font-weight:650;margin-top:14px;max-width:560px;line-height:1.15;}
+  .section-head p{color:var(--ink-soft);max-width:360px;font-size:1rem;line-height:1.6;}
+
+  .service-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+  .service-card{
+    background:#fff;border-radius:22px;padding:28px 24px;text-align:left;
+    border:1px solid rgba(139,44,107,.08);
+    transition:transform .5s var(--ease), box-shadow .5s var(--ease), border-color .4s ease;
+    position:relative;overflow:hidden;width:100%;
+  }
+  .service-card::before{
+    content:"";position:absolute;inset:0;opacity:0;
+    background:linear-gradient(160deg,var(--pink-100),transparent 60%);
     transition:opacity .5s ease;
   }
-  body.flash-on .flash{opacity:1;transition:opacity .35s ease;}
+  .service-card:hover{transform:translateY(-8px);box-shadow:0 24px 50px -20px rgba(139,44,107,.35);border-color:transparent;}
+  .service-card:hover::before{opacity:1;}
+  .service-card .icon-badge{background:var(--pink-100);color:var(--purple-600);margin-bottom:20px;position:relative;}
+  .service-card:hover .icon-badge{background:linear-gradient(135deg,var(--purple-600),var(--purple-500));color:#fff;}
+  .service-card h3{font-size:1.05rem;font-weight:700;margin-bottom:8px;position:relative;font-family:'Manrope',sans-serif;}
+  .service-card .tag{color:var(--ink-soft);font-size:.85rem;position:relative;}
+  .service-card .more{
+    display:inline-flex;align-items:center;gap:6px;margin-top:16px;font-size:.82rem;font-weight:700;
+    color:var(--purple-600);position:relative;
+  }
+  .service-card .more svg{width:13px;height:13px;transition:transform .4s var(--ease);}
+  .service-card:hover .more svg{transform:translateX(4px);}
 
-  /* ---------- scene shell ---------- */
-  .scene{
-    position:fixed;inset:0;
-    opacity:0;visibility:hidden;pointer-events:none;
-    transition:opacity .7s var(--ease);
+  /* ---------- modal ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(26,15,31,.7);backdrop-filter:blur(6px);
+    display:flex;align-items:center;justify-content:center;z-index:500;padding:24px;
+    opacity:0;pointer-events:none;transition:opacity .4s ease;
   }
-  .scene.active{opacity:1;visibility:visible;pointer-events:auto;}
+  .modal-overlay.open{opacity:1;pointer-events:auto;}
+  .modal-card{
+    background:#fff;border-radius:28px;max-width:480px;width:100%;padding:44px 38px;position:relative;
+    transform:scale(.88) translateY(20px);opacity:0;transition:transform .5s var(--ease), opacity .5s var(--ease);
+    box-shadow:0 40px 90px -20px rgba(26,15,31,.5);
+    max-height:88vh;overflow-y:auto;
+  }
+  .modal-overlay.open .modal-card{transform:scale(1) translateY(0);opacity:1;}
+  .modal-close{
+    position:absolute;top:22px;right:22px;width:36px;height:36px;border-radius:50%;
+    background:var(--pink-50);display:flex;align-items:center;justify-content:center;
+    transition:background .3s ease,transform .3s ease;
+  }
+  .modal-close:hover{background:var(--pink-200);transform:rotate(90deg);}
+  .modal-close svg{width:16px;height:16px;color:var(--purple-600);}
+  .modal-card .icon-badge{width:60px;height:60px;background:linear-gradient(135deg,var(--purple-600),var(--purple-500));color:#fff;margin-bottom:22px;}
+  .modal-card .icon-badge svg{width:28px;height:28px;}
+  .modal-card h3{font-family:'Fraunces',serif;font-size:1.6rem;font-weight:650;margin-bottom:14px;}
+  .modal-card .eyebrow{margin-bottom:12px;}
+  .modal-card p{color:var(--ink-soft);line-height:1.7;font-size:.98rem;}
+  .modal-card .modal-cta{margin-top:26px;}
 
-  /* =========================================================
-     SCENE 1 — HOME (the building)
-  ========================================================= */
-  .scene-home{overflow:hidden;}
-  .zoom-target{
-    position:absolute;inset:0;
-    transform:scale(1);
-    transform-origin:57% 76%;
-    transition:transform 1.15s var(--ease-in), filter 1.15s var(--ease-in);
-    will-change:transform;
+  /* ---------- contact ---------- */
+  .contact{
+    background:linear-gradient(180deg,var(--purple-950) 0%, var(--purple-900) 100%);
+    color:#fff;padding:120px 0;position:relative;overflow:hidden;
   }
-  .zoom-target.zoom-in{transform:scale(9);filter:blur(9px) brightness(1.15);}
-  .zoom-target img{
-    width:100%;height:100%;object-fit:cover;
-    animation:kenburns 26s ease-in-out infinite alternate;
-  }
-  @keyframes kenburns{
-    0%{transform:scale(1) translate(0,0);}
-    100%{transform:scale(1.09) translate(-1.2%,-1%);}
-  }
-  .vignette{
-    position:absolute;inset:0;
-    background:
-      linear-gradient(0deg, rgba(15,8,18,.92) 0%, rgba(15,8,18,.55) 32%, rgba(15,8,18,.15) 55%, rgba(15,8,18,.55) 100%),
-      linear-gradient(100deg, rgba(15,8,18,.65) 0%, rgba(15,8,18,.05) 42%, transparent 60%);
-  }
-  .home-content{
-    position:relative;z-index:2;height:100%;
-    display:flex;flex-direction:column;justify-content:flex-end;
-    padding:0 clamp(24px,6vw,64px) clamp(46px,7vh,80px);
-    max-width:900px;
-  }
-  .home-content .eyebrow{
-    font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--pink-200);font-weight:700;
-    display:flex;align-items:center;gap:10px;margin-bottom:18px;
-    opacity:0;animation:riseIn .9s var(--ease) .15s forwards;
-  }
-  .home-content .eyebrow::before{content:"";width:22px;height:2px;background:var(--pink-300);border-radius:2px;}
-  .home-content h1{
-    font-size:clamp(2rem,5.4vw,3.6rem);font-weight:650;line-height:1.08;letter-spacing:-.02em;
-    opacity:0;animation:riseIn .9s var(--ease) .28s forwards;
-  }
-  .home-content h1 em{font-style:italic;font-weight:500;color:var(--pink-300);}
-  @keyframes riseIn{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+  .contact .blob{opacity:.35;}
+  .contact-grid{display:grid;grid-template-columns:.95fr 1.05fr;gap:70px;position:relative;z-index:2;align-items:stretch;}
+  .contact-grid > div{display:flex;flex-direction:column;}
+  .contact .eyebrow{color:var(--pink-300);}
+  .contact .eyebrow::before{background:var(--pink-300);}
+  .contact h2{font-size:clamp(2rem,3.6vw,2.8rem);font-weight:650;margin:14px 0 20px;line-height:1.15;}
+  .contact > .wrap > .contact-grid > div > p.lede{color:rgba(255,255,255,.72);line-height:1.65;max-width:440px;margin-bottom:36px;}
 
-  .portal-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:38px;}
-  .portal-btn{
-    position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;
-    width:250px;padding:20px 22px;border-radius:20px;text-align:left;
-    background:rgba(255,255,255,.08);
-    border:1px solid rgba(255,255,255,.22);
-    backdrop-filter:blur(16px) saturate(140%);
-    transition:transform .5s var(--ease), background .4s ease, border-color .4s ease, box-shadow .5s var(--ease);
-    opacity:0;animation:riseIn .9s var(--ease) .42s forwards;
-    overflow:hidden;
-  }
-  .portal-row .portal-btn:nth-child(2){animation-delay:.52s;}
-  .portal-btn::after{
-    content:"";position:absolute;inset:0;border-radius:20px;
-    background:linear-gradient(135deg,rgba(243,184,212,.28),transparent 55%);
-    opacity:0;transition:opacity .4s ease;
-  }
-  .portal-btn:hover{transform:translateY(-5px);border-color:rgba(255,255,255,.5);box-shadow:0 20px 50px -18px rgba(0,0,0,.55);}
-  .portal-btn:hover::after{opacity:1;}
-  .portal-btn-alt{background:linear-gradient(135deg,rgba(139,44,107,.55),rgba(167,59,130,.4));}
-  .portal-num{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:650;color:var(--pink-300);}
-  .portal-label{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65);font-weight:700;}
-  .portal-title{font-size:1.02rem;font-weight:700;margin-top:6px;display:flex;align-items:center;gap:8px;}
-  .portal-title svg{width:15px;height:15px;transition:transform .4s var(--ease);}
-  .portal-btn:hover .portal-title svg{transform:translateX(5px);}
-
-  .hint{
-    margin-top:26px;font-size:.82rem;color:rgba(255,255,255,.55);
-    opacity:0;animation:riseIn .9s var(--ease) .68s forwards;
-    display:flex;align-items:center;gap:8px;
-  }
-  .hint .dot{width:6px;height:6px;border-radius:50%;background:var(--pink-300);animation:blink 1.8s infinite;}
-  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
-
-  /* ---------- shared back button ---------- */
-  .back-btn{
-    position:fixed;top:26px;right:30px;z-index:400;
-    display:flex;align-items:center;gap:8px;
-    padding:11px 18px 11px 14px;border-radius:999px;font-size:.82rem;font-weight:700;
-    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);
-    backdrop-filter:blur(14px);transition:transform .4s var(--ease), background .3s ease;
-  }
-  .back-btn:hover{transform:translateX(-3px);background:rgba(255,255,255,.16);}
-  .back-btn svg{width:15px;height:15px;}
-
-  /* =========================================================
-     SCENE 2 — SERVICES (inside the building)
-  ========================================================= */
-  .scene-services{
-    background:
-      radial-gradient(ellipse 100% 60% at 80% 0%, #3E1739 0%, var(--purple-950) 60%);
-    display:flex;flex-direction:column;
-  }
-  .lobby-head{padding:110px clamp(24px,6vw,64px) 0;max-width:640px;}
-  .lobby-head .eyebrow{
-    font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--pink-200);font-weight:700;
-    display:flex;align-items:center;gap:10px;margin-bottom:14px;
-  }
-  .lobby-head .eyebrow::before{content:"";width:22px;height:2px;background:var(--pink-300);border-radius:2px;}
-  .lobby-head h2{font-size:clamp(1.7rem,3.6vw,2.5rem);font-weight:650;line-height:1.12;}
-
-  .elevator-rail{
-    position:absolute;top:118px;bottom:96px;right:clamp(18px,4vw,54px);width:2px;z-index:3;
-    display:flex;justify-content:center;
-  }
-  .rail-line{position:absolute;inset:0;background:rgba(255,255,255,.16);border-radius:2px;}
-  .rail-dot{
-    position:absolute;left:50%;top:0;transform:translate(-50%,0);
-    width:12px;height:12px;border-radius:50%;
-    background:var(--pink-300);box-shadow:0 0 0 5px rgba(243,184,212,.18);
-    transition:top .5s var(--ease);
-  }
-
-  .floor-stack{
-    flex:1;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y proximity;
-    padding:44px clamp(24px,6vw,64px) 140px;
-    display:flex;flex-direction:column;gap:22px;
-    max-width:920px;
-  }
-  .floor-card{
-    scroll-snap-align:start;
-    position:relative;display:grid;grid-template-columns:auto 1fr;gap:22px;
-    padding:30px clamp(20px,3vw,34px);border-radius:24px;
-    background:linear-gradient(155deg,rgba(255,255,255,.09),rgba(255,255,255,.02));
-    border:1px solid rgba(255,255,255,.14);
-    opacity:0;transform:translateY(26px);
-    transition:opacity .7s var(--ease), transform .7s var(--ease), border-color .3s ease, background .3s ease;
-  }
-  .floor-card.in{opacity:1;transform:translateY(0);}
-  .floor-card:hover{border-color:rgba(243,184,212,.45);background:linear-gradient(155deg,rgba(255,255,255,.13),rgba(255,255,255,.03));}
-  .floor-num{
-    font-family:'Fraunces',serif;font-size:2.6rem;font-weight:650;color:rgba(255,255,255,.16);
-    line-height:1;align-self:start;
-  }
-  .floor-icon{
-    width:46px;height:46px;border-radius:14px;flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;margin-bottom:14px;
-    background:linear-gradient(135deg,var(--purple-600),var(--purple-500));
-  }
-  .floor-icon svg{width:22px;height:22px;color:#fff;}
-  .floor-card h3{font-size:1.18rem;font-weight:650;margin-bottom:4px;}
-  .floor-tag{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-300);font-weight:700;margin-bottom:10px;}
-  .floor-card p{font-size:.92rem;line-height:1.6;color:rgba(255,255,255,.72);max-width:56ch;}
-
-  .cta-contact-from-services{
-    position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:80;
-    display:flex;align-items:center;gap:10px;
-    padding:15px 26px;border-radius:999px;font-weight:700;font-size:.92rem;
-    background:linear-gradient(135deg,var(--purple-600),var(--purple-500));
-    box-shadow:0 14px 34px -10px rgba(139,44,107,.65);
-    transition:transform .4s var(--ease);
-  }
-  .cta-contact-from-services:hover{transform:translateX(-50%) translateY(-3px);}
-  .cta-contact-from-services svg{width:15px;height:15px;}
-
-  /* =========================================================
-     SCENE 3 — CONTACT (reception desk)
-  ========================================================= */
-  .scene-contact{
-    background:
-      radial-gradient(ellipse 90% 60% at 15% 0%, #3E1739 0%, var(--purple-950) 55%);
-    overflow-y:auto;
-  }
-  .door{
-    position:fixed;top:0;bottom:0;width:50%;z-index:600;
-    background:
-      linear-gradient(155deg,rgba(255,255,255,.14),rgba(255,255,255,.02)),
-      linear-gradient(135deg,var(--purple-800),var(--purple-950));
-    border-right:1px solid rgba(255,255,255,.1);
-    transition:transform .95s var(--ease-in);
-    display:flex;align-items:center;pointer-events:none;
-  }
-  .door-left{left:0;justify-content:flex-end;transform:translateX(0);}
-  .door-right{right:0;justify-content:flex-start;transform:translateX(0);border-right:none;border-left:1px solid rgba(255,255,255,.1);}
-  .door .clover{width:34px;height:34px;margin:0 30px;opacity:.5;}
-  body.doors-open .door-left{transform:translateX(-101%);}
-  body.doors-open .door-right{transform:translateX(101%);}
-
-  .reception-wrap{padding:118px clamp(24px,6vw,64px) 90px;max-width:1180px;margin:0 auto;}
-  .reception-wrap .eyebrow{
-    font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--pink-200);font-weight:700;
-    display:flex;align-items:center;gap:10px;margin-bottom:14px;
-  }
-  .reception-wrap .eyebrow::before{content:"";width:22px;height:2px;background:var(--pink-300);border-radius:2px;}
-  .reception-wrap h2{font-size:clamp(1.7rem,3.6vw,2.5rem);font-weight:650;margin-bottom:16px;line-height:1.14;}
-  .reception-wrap > p.lede{color:rgba(255,255,255,.72);max-width:520px;line-height:1.6;margin-bottom:38px;}
-
-  .reception-grid{display:grid;grid-template-columns:1fr 1.05fr;gap:52px;align-items:start;}
-  .info-list{display:flex;flex-direction:column;gap:18px;}
-  .info-row{display:flex;gap:16px;align-items:flex-start;}
-  .info-row .icon-badge{
-    width:42px;height:42px;border-radius:12px;flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;
-    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);
-  }
-  .info-row .icon-badge svg{width:18px;height:18px;color:var(--pink-200);}
-  .info-row h4{font-size:.95rem;font-weight:700;margin-bottom:3px;}
-  .info-row p, .info-row a{font-size:.9rem;color:rgba(255,255,255,.68);}
+  .info-list{display:flex;flex-direction:column;gap:22px;flex:1;justify-content:space-evenly;}
+  .info-row{display:flex;gap:18px;align-items:flex-start;padding:18px;border-radius:18px;transition:background .4s ease;}
+  .info-row:hover{background:rgba(255,255,255,.05);}
+  .info-row .icon-badge{background:rgba(255,255,255,.1);color:var(--pink-300);flex-shrink:0;}
+  .info-row h4{font-weight:700;margin-bottom:4px;font-size:.98rem;}
+  .info-row p{color:rgba(255,255,255,.65);font-size:.92rem;line-height:1.5;}
+  .info-row a{color:rgba(255,255,255,.9);font-weight:600;}
   .info-row a:hover{color:var(--pink-300);}
 
   .form-card{
-    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
-    border-radius:24px;padding:30px;backdrop-filter:blur(10px);
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+    border-radius:26px;padding:42px;backdrop-filter:blur(10px);
+    flex:1;display:flex;flex-direction:column;justify-content:center;
   }
-  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-  .field{margin-bottom:16px;}
-  .field label{display:block;font-size:.76rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:7px;}
+  .field{margin-bottom:20px;}
+  .field label{display:block;font-size:.8rem;letter-spacing:.04em;color:rgba(255,255,255,.6);margin-bottom:8px;font-weight:600;}
   .field input, .field select, .field textarea{
-    width:100%;padding:12px 14px;border-radius:12px;font-family:inherit;font-size:.92rem;
-    background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);color:#fff;
-    transition:border-color .3s ease,background .3s ease;
+    width:100%;padding:14px 16px;border-radius:12px;background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.15);color:#fff;font-family:inherit;font-size:.95rem;
+    transition:border-color .3s ease, background .3s ease;
   }
-  .field input::placeholder, .field textarea::placeholder{color:rgba(255,255,255,.35);}
-  .field input:focus, .field select:focus, .field textarea:focus{outline:none;border-color:var(--pink-300);background:rgba(255,255,255,.11);}
-  .field select option{background:var(--purple-900);color:#fff;}
-  .form-submit{
-    width:100%;justify-content:center;display:flex;align-items:center;gap:10px;
-    padding:15px 28px;border-radius:999px;font-weight:700;font-size:.95rem;
-    background:linear-gradient(135deg,var(--purple-600),var(--purple-500));
-    box-shadow:0 10px 30px -8px rgba(139,44,107,.55);
-    transition:transform .45s var(--ease);
+  .field select option{color:#111;}
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline:none;border-color:var(--pink-300);background:rgba(255,255,255,.12);
   }
-  .form-submit:hover{transform:translateY(-3px);}
-  .form-submit svg{width:16px;height:16px;}
-  .form-note{margin-top:12px;font-size:.85rem;color:var(--pink-300);min-height:1.2em;}
+  .field input::placeholder, .field textarea::placeholder{color:rgba(255,255,255,.4);}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .form-submit{width:100%;justify-content:center;position:relative;overflow:hidden;}
+  .form-note{margin-top:14px;font-size:.8rem;color:rgba(255,255,255,.5);text-align:center;min-height:18px;}
 
-  @media(max-width:860px){
-    .reception-grid{grid-template-columns:1fr;gap:34px;}
+  /* ---------- footer ---------- */
+  footer{background:var(--purple-950);color:rgba(255,255,255,.55);padding:34px 0;border-top:1px solid rgba(255,255,255,.08);}
+  .foot-grid{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;}
+  .foot-grid .brand-text b{color:#fff;font-size:1rem;}
+  footer .social{display:flex;gap:12px;}
+  footer .social a{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;transition:background .3s ease, transform .3s ease;}
+  footer .social a:hover{background:var(--purple-600);transform:translateY(-3px);}
+  footer .social svg{width:15px;height:15px;color:#fff;}
+  footer small{font-size:.78rem;}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1080px){
+    .hero-grid{grid-template-columns:1fr;}
+    .hero-visual{order:-1;width:100%;margin-bottom:8px;}
+    .platform-grid{grid-template-columns:1fr 1fr;}
+    .service-grid{grid-template-columns:repeat(2,1fr);}
+    .contact-grid{grid-template-columns:1fr;gap:50px;}
+    .form-card{padding:34px;}
+  }
+  /* tablet nav: full nav bar (links + phone + CTA) was overflowing/crowding
+     before the burger takes over at 760px — trim it in stages */
+  @media (max-width:980px){
+    .nav-links{gap:2px;}
+    .nav-links a{padding:10px 13px;font-size:.88rem;}
+    .nav-cta{gap:12px;}
+    .nav-phone{display:none;}
+  }
+  @media (max-width:860px){
+    .nav-book-btn{padding:10px 16px !important;font-size:.8rem !important;}
+    .brand-text span{display:none;}
+  }
+  @media (max-width:760px){
+    .wrap{padding:0 22px;}
+    .nav-links{display:none;}
+    .nav-book-btn{display:none;}
+    .burger{display:flex;}
+    .hero{padding-top:104px;}
+    .card-stack{max-width:250px;aspect-ratio:1/1.3;margin:0 auto;}
+    .scroll-cue{display:none;}
+    .stat-row{margin-top:32px;gap:22px;row-gap:18px;}
+    .rx-inner{padding:20px;}
+    .rx-inner h4{font-size:.92rem;}
+    .rx-line{height:7px;margin-bottom:8px;}
+    .pulse-dot{display:none;}
+    .platforms{padding:56px 0 40px;}
+    .services{padding:64px 0 96px;}
+    .section-head{margin-bottom:36px;}
+    .platform-grid{grid-template-columns:1fr;}
+    .service-grid{grid-template-columns:1fr;}
+    .contact{padding:70px 0;}
+    .form-card{padding:26px 22px;}
+    .modal-card{padding:32px 24px;max-height:85vh;overflow-y:auto;}
     .field-row{grid-template-columns:1fr;}
-    .elevator-rail{display:none;}
-    .portal-row{flex-direction:column;}
-    .portal-btn{width:100%;}
-    .floor-card{grid-template-columns:1fr;}
-    .floor-num{font-size:1.6rem;}
+    .foot-grid{flex-direction:column;text-align:center;}
+  }
+  @media (max-width:400px){
+    .hero h1{font-size:2.2rem;}
+    .btn{padding:14px 22px;font-size:.88rem;}
+    .stat b{font-size:1.7rem;}
+  }
+
+  /* mobile nav drawer */
+  .mobile-menu{
+    position:fixed;top:0;right:0;height:100svh;width:78%;max-width:320px;
+    background:var(--purple-950);z-index:300;padding:100px 34px 40px;
+    transform:translateX(100%);transition:transform .5s var(--ease);
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .mobile-menu.open{transform:translateX(0);}
+  .mobile-menu a{padding:16px 4px;font-size:1.15rem;font-weight:650;color:#fff;border-bottom:1px solid rgba(255,255,255,.08);font-family:'Fraunces',serif;}
+  .mobile-menu .btn{margin-top:20px;justify-content:center;}
+  .menu-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:250;opacity:0;pointer-events:none;transition:opacity .4s ease;}
+  .menu-backdrop.open{opacity:1;pointer-events:auto;}
+  body.menu-lock{overflow:hidden;}
+
+  /* ---------- touch devices: don't leave hover/lift states "stuck" after a tap ---------- */
+  @media (hover:none){
+    .btn-primary:hover{transform:none;box-shadow:0 10px 30px -8px rgba(139,44,107,.55);}
+    .btn-ghost:hover{background:transparent;transform:none;}
+    .hero .btn-ghost:hover{background:transparent;}
+    .platform-card:hover{transform:none;box-shadow:none;background:var(--pink-50);}
+    .service-card:hover{transform:none;box-shadow:none;border-color:rgba(139,44,107,.08);}
+    .service-card:hover::before{opacity:0;}
+    .service-card:hover .icon-badge{background:var(--pink-100);color:var(--purple-600);}
+    .service-card:hover .more svg{transform:none;}
+    .modal-close:hover{background:var(--pink-50);transform:none;}
+    footer .social a:hover{background:rgba(255,255,255,.06);transform:none;}
   }
 </style>
 </head>
-<body data-scene="home">
+<body>
 
-<div class="flash"></div>
+<!-- ===== NAV ===== -->
+<header id="siteHeader">
+  <div class="wrap">
+    <nav>
+      <a href="#home" class="brand">
+        <svg class="clover" viewBox="0 0 60 60" fill="none">
+          <circle class="petal" cx="21" cy="21" r="14" fill="#F3B8D4"/>
+          <circle class="petal" cx="39" cy="21" r="14" fill="#8B2C6B"/>
+          <circle class="petal" cx="21" cy="39" r="14" fill="#8B2C6B"/>
+          <circle class="petal" cx="39" cy="39" r="14" fill="#F3B8D4"/>
+        </svg>
+        <span class="brand-text"><b>Les Lilas</b><span>Clinique de diagnostic médical</span></span>
+      </a>
 
-<div class="brandmark">
-  <svg viewBox="0 0 60 60" fill="none">
-    <circle cx="21" cy="21" r="14" fill="#F3B8D4"/>
-    <circle cx="39" cy="21" r="14" fill="#8B2C6B"/>
-    <circle cx="21" cy="39" r="14" fill="#8B2C6B"/>
-    <circle cx="39" cy="39" r="14" fill="#F3B8D4"/>
-  </svg>
-  <div>
-    <span>Clinique Les Lilas</span>
-    <small>Diagnostic médical</small>
+      <div class="nav-links" id="navLinks">
+        <div class="nav-pill" id="navPill"></div>
+        <a href="#home" class="nav-link active" data-target="home">Accueil</a>
+        <a href="#services" class="nav-link" data-target="services">Services</a>
+        <a href="#contact" class="nav-link" data-target="contact">Contact</a>
+      </div>
+
+      <div class="nav-cta">
+        <a href="tel:0560140140" class="nav-phone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          0560 14 01 40
+        </a>
+        <a href="#contact" class="btn btn-primary nav-book-btn" style="padding:11px 22px;font-size:.85rem;">Rendez-vous</a>
+        <button class="burger" id="burgerBtn" aria-label="Menu"><span></span><span></span><span></span></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<div class="menu-backdrop" id="menuBackdrop"></div>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#home" class="mm-link">Accueil</a>
+  <a href="#services" class="mm-link">Services</a>
+  <a href="#contact" class="mm-link">Contact</a>
+  <a href="tel:0560140140" class="btn btn-primary">Appeler la clinique</a>
+</div>
+
+<!-- ===== HOME ===== -->
+<section class="hero" id="home">
+  <span class="blob blob1"></span>
+  <span class="blob blob2"></span>
+  <span class="blob blob3"></span>
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow" style="color:var(--pink-300)">Clinique Les Lilas · Haï El Yasmine</div>
+      <h1 style="margin-top:18px;">Le diagnostic,<br><em>en toute confiance.</em></h1>
+      <p class="lede">Consultation, laboratoire et imagerie réunis dans un même lieu, avec huit spécialités médicales et une équipe qui prend le temps de vous expliquer chaque étape.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn btn-primary">
+          Prendre rendez-vous
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a href="#services" class="btn btn-ghost">Découvrir les spécialités</a>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><b>8</b><span>spécialités médicales</span></div>
+        <div class="stat"><b>3</b><span>plateaux techniques</span></div>
+        <div class="stat"><b>48h</b><span>délai moyen des résultats</span></div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="card-stack">
+        <div class="rx-card"></div>
+        <div class="pulse-dot p1"></div>
+        <div class="pulse-dot p2"></div>
+        <div class="rx-inner">
+          <div class="rx-head">
+            <svg class="clover" viewBox="0 0 60 60" fill="none">
+              <circle cx="21" cy="21" r="14" fill="#F3B8D4"/>
+              <circle cx="39" cy="21" r="14" fill="#8B2C6B"/>
+              <circle cx="21" cy="39" r="14" fill="#8B2C6B"/>
+              <circle cx="39" cy="39" r="14" fill="#F3B8D4"/>
+            </svg>
+            <span style="font-size:.7rem;color:#a98da3;font-weight:700;letter-spacing:.06em;">ORDONNANCE</span>
+          </div>
+          <h4>Bilan de suivi</h4>
+          <p style="font-size:.78rem;color:#a98da3;margin-bottom:20px;">Dr. — Médecine interne</p>
+          <div class="rx-line" style="width:92%"></div>
+          <div class="rx-line" style="width:70%"></div>
+          <div class="rx-line" style="width:80%"></div>
+          <div class="rx-line" style="width:55%"></div>
+          <div style="margin-top:22px;display:flex;align-items:center;gap:10px;">
+            <div class="icon-badge" style="width:38px;height:38px;border-radius:10px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <span style="font-size:.78rem;color:var(--ink-soft);font-weight:600;">Résultats sous 48h</span>
+          </div>
+          <div style="margin-top:18px;padding-top:16px;border-top:1px dashed var(--pink-100);display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:.72rem;color:#c7a9c0;letter-spacing:.04em;">Clinique Les Lilas</span>
+            <span style="font-size:.72rem;color:#c7a9c0;">Validé ✓</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-cue"><span>Défiler</span><span class="line"></span></div>
+</section>
+
+<!-- ===== PLATFORMS ===== -->
+<section class="platforms">
+  <div class="wrap">
+    <div class="eyebrow reveal">Nos plateaux techniques</div>
+    <div class="section-head" style="margin-bottom:0;">
+      <h2 class="reveal">Trois pôles, une seule adresse.</h2>
+    </div>
+
+    <div class="platform-grid stagger">
+      <div class="platform-card reveal">
+        <div class="icon-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <h3>Consultation</h3>
+        <p>Rendez-vous avec nos médecins spécialistes, du diagnostic au suivi personnalisé.</p>
+        <a href="tel:0560140140" class="platform-phone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          0560 14 01 40
+        </a>
+      </div>
+
+      <div class="platform-card reveal">
+        <div class="icon-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3v6l-6 10a1 1 0 0 0 .9 1.5h16.2a1 1 0 0 0 .9-1.5L15 9V3"/><path d="M9 3h6M9 12h6"/></svg>
+        </div>
+        <h3>Laboratoire</h3>
+        <p>Analyses biologiques complètes, réalisées et interprétées sur place.</p>
+        <a href="tel:0560120420" class="platform-phone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          0560 12 04 20
+        </a>
+      </div>
+
+      <div class="platform-card reveal">
+        <div class="icon-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+        </div>
+        <h3>Imagerie</h3>
+        <p>Radiologie et imagerie médicale de précision pour un diagnostic fiable.</p>
+        <a href="tel:0560120220" class="platform-phone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          0560 12 02 20
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SERVICES ===== -->
+<section class="services" id="services">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow reveal">Spécialités médicales</div>
+        <h2 class="reveal">Huit expertises, une même équipe.</h2>
+      </div>
+      <p class="reveal">Chaque spécialiste travaille en lien avec le laboratoire et l'imagerie pour un diagnostic complet. Cliquez sur une carte pour en savoir plus.</p>
+    </div>
+
+    <div class="service-grid stagger" id="serviceGrid">
+      <!-- cards injected by JS from data array -->
+    </div>
+  </div>
+  <div class="services-divider">
+    <svg viewBox="0 0 1440 110" preserveAspectRatio="none">
+      <path d="M0,110 L0,60 C 240,10 480,0 720,20 C 960,40 1200,90 1440,50 L1440,110 Z" fill="#1A0F1F"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card" id="modalCard">
+    <button class="modal-close" id="modalClose" aria-label="Fermer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="icon-badge" id="modalIcon"></div>
+    <div class="eyebrow" id="modalEyebrow">Spécialité</div>
+    <h3 id="modalTitle">Titre</h3>
+    <p id="modalDesc">Description</p>
+    <a href="#contact" class="btn btn-primary modal-cta" id="modalCta">
+      Prendre rendez-vous
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
   </div>
 </div>
 
-<!-- ================= SCENE 1 : HOME ================= -->
-<section class="scene scene-home active" id="scene-home">
-  <div class="zoom-target" id="zoomTarget">
-    <img src="./assets/clinique-building.png" alt="Vue aérienne de la Clinique Les Lilas">
-    <div class="vignette"></div>
-  </div>
+<!-- ===== CONTACT ===== -->
+<section class="contact" id="contact">
+  <span class="blob blob1" style="top:-200px;left:-100px;right:auto;"></span>
+  <span class="blob blob2" style="bottom:-160px;right:-100px;"></span>
+  <div class="wrap contact-grid">
+    <div>
+      <div class="eyebrow reveal">Contact</div>
+      <h2 class="reveal">Parlons de votre santé.</h2>
+      <p class="lede reveal">Notre équipe vous répond du dimanche au jeudi. Appelez le service concerné ou laissez-nous un message, nous revenons vers vous rapidement.</p>
 
-  <div class="home-content">
-    <p class="eyebrow">Haï El Yasmine — Clinique de diagnostic médical</p>
-    <h1>Un bâtiment, <em>huit</em><br>spécialités, une équipe.</h1>
-
-    <div class="portal-row">
-      <button class="portal-btn" id="btnServices" type="button">
-        <span class="portal-num">08</span>
-        <span class="portal-label">Spécialités médicales</span>
-        <span class="portal-title">Entrer dans la clinique
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </span>
-      </button>
-      <button class="portal-btn portal-btn-alt" id="btnContact" type="button">
-        <span class="portal-num">RDV</span>
-        <span class="portal-label">Accueil &amp; contact</span>
-        <span class="portal-title">Prendre rendez-vous
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </span>
-      </button>
-    </div>
-
-    <p class="hint"><span class="dot"></span>Cliquez sur « Entrer dans la clinique » pour visiter les services</p>
-  </div>
-</section>
-
-<!-- ================= SCENE 2 : SERVICES ================= -->
-<section class="scene scene-services" id="scene-services">
-  <button class="back-btn" id="backFromServices" type="button">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
-    Retour au parvis
-  </button>
-
-  <div class="lobby-head">
-    <p class="eyebrow">Vous êtes ici — hall d'accueil</p>
-    <h2>Huit départements, un seul bâtiment.</h2>
-  </div>
-
-  <div class="elevator-rail" id="elevatorRail">
-    <div class="rail-line"></div>
-    <div class="rail-dot" id="railDot"></div>
-  </div>
-
-  <div class="floor-stack" id="floorStack"></div>
-
-  <button class="cta-contact-from-services" id="btnContactFromServices" type="button">
-    Prendre rendez-vous
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-  </button>
-</section>
-
-<!-- ================= SCENE 3 : CONTACT ================= -->
-<section class="scene scene-contact" id="scene-contact">
-  <button class="back-btn" id="backFromContact" type="button">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
-    Retour
-  </button>
-
-  <div class="door door-left" id="doorLeft">
-    <svg class="clover" viewBox="0 0 60 60" fill="none">
-      <circle cx="21" cy="21" r="14" fill="#F3B8D4"/><circle cx="39" cy="21" r="14" fill="#8B2C6B"/>
-      <circle cx="21" cy="39" r="14" fill="#8B2C6B"/><circle cx="39" cy="39" r="14" fill="#F3B8D4"/>
-    </svg>
-  </div>
-  <div class="door door-right" id="doorRight">
-    <svg class="clover" viewBox="0 0 60 60" fill="none">
-      <circle cx="21" cy="21" r="14" fill="#F3B8D4"/><circle cx="39" cy="21" r="14" fill="#8B2C6B"/>
-      <circle cx="21" cy="39" r="14" fill="#8B2C6B"/><circle cx="39" cy="39" r="14" fill="#F3B8D4"/>
-    </svg>
-  </div>
-
-  <div class="reception-wrap">
-    <p class="eyebrow">Contact</p>
-    <h2>Parlons de votre santé.</h2>
-    <p class="lede">Notre équipe vous répond du dimanche au jeudi. Appelez le service concerné ou laissez-nous un message, nous revenons vers vous rapidement.</p>
-
-    <div class="reception-grid">
-      <div class="info-list">
-        <div class="info-row">
-          <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
-          <div><h4>Adresse</h4><p>13, Zone des cliniques, Haï El Yasmine</p></div>
+      <div class="info-list stagger">
+        <div class="info-row reveal">
+          <div class="icon-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div>
+            <h4>Adresse</h4>
+            <p>13, Zone des cliniques, Haï El Yasmine</p>
+          </div>
         </div>
-        <div class="info-row">
-          <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
-          <div><h4>Consultation</h4><p><a href="tel:0560140140">0560 14 01 40</a></p></div>
+        <div class="info-row reveal">
+          <div class="icon-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <div>
+            <h4>Consultation</h4>
+            <p><a href="tel:0560140140">0560 14 01 40</a></p>
+          </div>
         </div>
-        <div class="info-row">
-          <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3v6l-6 10a1 1 0 0 0 .9 1.5h16.2a1 1 0 0 0 .9-1.5L15 9V3"/><path d="M9 3h6M9 12h6"/></svg></div>
-          <div><h4>Laboratoire</h4><p><a href="tel:0560120420">0560 12 04 20</a></p></div>
+        <div class="info-row reveal">
+          <div class="icon-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3v6l-6 10a1 1 0 0 0 .9 1.5h16.2a1 1 0 0 0 .9-1.5L15 9V3"/><path d="M9 3h6M9 12h6"/></svg>
+          </div>
+          <div>
+            <h4>Laboratoire</h4>
+            <p><a href="tel:0560120420">0560 12 04 20</a></p>
+          </div>
         </div>
-        <div class="info-row">
-          <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
-          <div><h4>Imagerie</h4><p><a href="tel:0560120220">0560 12 02 20</a></p></div>
+        <div class="info-row reveal">
+          <div class="icon-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+          </div>
+          <div>
+            <h4>Imagerie</h4>
+            <p><a href="tel:0560120220">0560 12 02 20</a></p>
+          </div>
         </div>
       </div>
+    </div>
 
+    <div class="reveal">
       <form class="form-card" id="contactForm">
         <div class="field-row">
           <div class="field">
@@ -441,13 +671,23 @@
         </div>
         <div class="field">
           <label for="fservice">Spécialité souhaitée</label>
-          <select id="fservice"></select>
+          <select id="fservice">
+            <option>Consultation générale</option>
+            <option>Médecin cardiologue</option>
+            <option>Médecin gastrologue</option>
+            <option>Médecin radiologue</option>
+            <option>Médecine interne et diabète</option>
+            <option>Médecin hématologue</option>
+            <option>Médecine nucléaire</option>
+            <option>Médecin urologue</option>
+            <option>Pharmacienne biologiste</option>
+          </select>
         </div>
         <div class="field">
           <label for="fmsg">Message</label>
           <textarea id="fmsg" rows="3" placeholder="Décrivez brièvement votre demande"></textarea>
         </div>
-        <button type="submit" class="form-submit" id="formSubmit">
+        <button type="submit" class="btn btn-primary form-submit" id="formSubmit">
           <span id="submitLabel">Envoyer la demande</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </button>
@@ -457,127 +697,186 @@
   </div>
 </section>
 
+<footer>
+  <div class="wrap foot-grid">
+    <a href="#home" class="brand">
+      <svg class="clover" viewBox="0 0 60 60" fill="none" style="width:26px;height:26px;">
+        <circle cx="21" cy="21" r="14" fill="#F3B8D4"/>
+        <circle cx="39" cy="21" r="14" fill="#8B2C6B"/>
+        <circle cx="21" cy="39" r="14" fill="#8B2C6B"/>
+        <circle cx="39" cy="39" r="14" fill="#F3B8D4"/>
+      </svg>
+      <span class="brand-text"><b>Clinique Les Lilas</b></span>
+    </a>
+    <small>© 2026 Clinique de diagnostic médical Les Lilas — Haï El Yasmine.</small>
+    <div class="social">
+      <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="3.5"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+      <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+    </div>
+  </div>
+</footer>
+
 <script>
   // ---------- data ----------
   const services = [
-    { title:"Médecin cardiologue", tag:"Cœur & circulation", icon:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>',
-      desc:"Suivi du rythme cardiaque, de la tension et des facteurs de risque. Consultations, électrocardiogramme et échographie cardiaque pour prévenir et traiter les maladies cardiovasculaires." },
-    { title:"Médecin gastrologue", tag:"Appareil digestif", icon:'<path d="M8 3v4a4 4 0 0 0 4 4a4 4 0 0 0 4-4V3"/><path d="M8 11v3a5 5 0 0 0 5 5h0a5 5 0 0 0 5-5v-1"/><circle cx="8" cy="17" r="2.2"/>',
-      desc:"Diagnostic et traitement des troubles digestifs : estomac, intestin, foie et pancréas. Prise en charge des douleurs abdominales chroniques et des maladies inflammatoires." },
-    { title:"Médecin radiologue", tag:"Imagerie diagnostique", icon:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/>',
-      desc:"Lecture et interprétation des examens d'imagerie — radiographie, échographie et scanner — pour poser un diagnostic précis en lien direct avec votre médecin traitant." },
-    { title:"Médecine interne et diabète", tag:"Maladies chroniques", icon:'<path d="M3 12h4l2-7 4 14 2-7h6"/>',
-      desc:"Suivi global des patients diabétiques et des maladies chroniques : équilibre glycémique, bilans réguliers et ajustement du traitement au long cours." },
-    { title:"Médecin hématologue", tag:"Maladies du sang", icon:'<path d="M12 2C8 8 5 11.5 5 15a7 7 0 0 0 14 0c0-3.5-3-7-7-13Z"/>',
-      desc:"Exploration des troubles du sang : anémies, anomalies de la coagulation et suivi biologique fin, en coordination étroite avec notre laboratoire." },
-    { title:"Médecine nucléaire", tag:"Imagerie fonctionnelle", icon:'<circle cx="12" cy="12" r="2.5"/><ellipse cx="12" cy="12" rx="9" ry="4"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(120 12 12)"/>',
-      desc:"Scintigraphies et examens fonctionnels pour explorer le fonctionnement des organes, en complément de l'imagerie classique." },
-    { title:"Médecin urologue", tag:"Appareil urinaire", icon:'<path d="M9 4C6 4 4.5 7 4.5 11c0 5 2.5 9 6 9c2 0 2.7-1.7 2.2-3.6c-.5-1.9-1.9-2.4-1.9-4.4c0-2.3 2.2-2.7 2.2-5.5C13 4.5 11.5 4 9 4Z"/><path d="M15 9c1.7 0 3 1.8 3 4.5S16.7 18 15 18"/>',
-      desc:"Prise en charge des affections de l'appareil urinaire et du système reproducteur masculin, du dépistage au suivi post-traitement." },
-    { title:"Pharmacienne biologiste", tag:"Analyses de laboratoire", icon:'<path d="M9 3v6l-6 10a1 1 0 0 0 .9 1.5h16.2a1 1 0 0 0 .9-1.5L15 9V3"/><path d="M9 3h6M9 12h6"/>',
-      desc:"Réalisation et validation des analyses biologiques du laboratoire, garantissant des résultats fiables transmis rapidement à votre médecin." }
+    {
+      title:"Médecin cardiologue",
+      tag:"Cœur & circulation",
+      eyebrow:"Cardiologie",
+      icon:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>',
+      desc:"Suivi du rythme cardiaque, de la tension et des facteurs de risque. Consultations, électrocardiogramme et échographie cardiaque pour prévenir et traiter les maladies cardiovasculaires."
+    },
+    {
+      title:"Médecin gastrologue",
+      tag:"Appareil digestif",
+      eyebrow:"Gastro-entérologie",
+      icon:'<path d="M8 3v4a4 4 0 0 0 4 4a4 4 0 0 0 4-4V3"/><path d="M8 11v3a5 5 0 0 0 5 5h0a5 5 0 0 0 5-5v-1"/><circle cx="8" cy="17" r="2.2"/>',
+      desc:"Diagnostic et traitement des troubles digestifs : estomac, intestin, foie et pancréas. Prise en charge des douleurs abdominales chroniques et des maladies inflammatoires."
+    },
+    {
+      title:"Médecin radiologue",
+      tag:"Imagerie diagnostique",
+      eyebrow:"Radiologie",
+      icon:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/>',
+      desc:"Lecture et interprétation des examens d'imagerie — radiographie, échographie et scanner — pour poser un diagnostic précis en lien direct avec votre médecin traitant."
+    },
+    {
+      title:"Médecine interne et diabète",
+      tag:"Maladies chroniques",
+      eyebrow:"Médecine interne",
+      icon:'<path d="M3 12h4l2-7 4 14 2-7h6"/>',
+      desc:"Suivi global des patients diabétiques et des maladies chroniques : équilibre glycémique, bilans réguliers et ajustement du traitement au long cours."
+    },
+    {
+      title:"Médecin hématologue",
+      tag:"Maladies du sang",
+      eyebrow:"Hématologie",
+      icon:'<path d="M12 2C8 8 5 11.5 5 15a7 7 0 0 0 14 0c0-3.5-3-7-7-13Z"/>',
+      desc:"Exploration des troubles du sang : anémies, anomalies de la coagulation et suivi biologique fin, en coordination étroite avec notre laboratoire."
+    },
+    {
+      title:"Médecine nucléaire",
+      tag:"Imagerie fonctionnelle",
+      eyebrow:"Médecine nucléaire",
+      icon:'<circle cx="12" cy="12" r="2.5"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(0 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(120 12 12)"/>',
+      desc:"Scintigraphies et examens fonctionnels pour explorer le fonctionnement des organes, en complément de l'imagerie classique."
+    },
+    {
+      title:"Médecin urologue",
+      tag:"Appareil urinaire",
+      eyebrow:"Urologie",
+      icon:'<path d="M9 4C6 4 4.5 7 4.5 11c0 5 2.5 9 6 9c2 0 2.7-1.7 2.2-3.6c-.5-1.9-1.9-2.4-1.9-4.4c0-2.3 2.2-2.7 2.2-5.5C13 4.5 11.5 4 9 4Z"/><path d="M15 9c1.7 0 3 1.8 3 4.5S16.7 18 15 18"/>',
+      desc:"Prise en charge des affections de l'appareil urinaire et du système reproducteur masculin, du dépistage au suivi post-traitement."
+    },
+    {
+      title:"Pharmacienne biologiste",
+      tag:"Analyses de laboratoire",
+      eyebrow:"Biologie médicale",
+      icon:'<path d="M9 3v6l-6 10a1 1 0 0 0 .9 1.5h16.2a1 1 0 0 0 .9-1.5L15 9V3"/><path d="M9 3h6M9 12h6"/>',
+      desc:"Réalisation et validation des analyses biologiques du laboratoire, garantissant des résultats fiables transmis rapidement à votre médecin."
+    }
   ];
 
-  const floorStack = document.getElementById('floorStack');
-  services.forEach((s,i)=>{
-    const n = String(services.length - i).padStart(2,'0');
-    const card = document.createElement('div');
-    card.className = 'floor-card';
+  const grid = document.getElementById('serviceGrid');
+  services.forEach((s, i)=>{
+    const card = document.createElement('button');
+    card.className = 'service-card reveal';
+    card.type = 'button';
     card.innerHTML = `
-      <div class="floor-num">${n}</div>
-      <div>
-        <div class="floor-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${s.icon}</svg></div>
-        <h3>${s.title}</h3>
-        <div class="floor-tag">${s.tag}</div>
-        <p>${s.desc}</p>
-      </div>`;
-    floorStack.appendChild(card);
+      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${s.icon}</svg></div>
+      <h3>${s.title}</h3>
+      <div class="tag">${s.tag}</div>
+      <span class="more">En savoir plus
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </span>`;
+    card.addEventListener('click', ()=>openModal(s));
+    grid.appendChild(card);
   });
 
-  const fservice = document.getElementById('fservice');
-  services.forEach(s=>{
-    const opt = document.createElement('option');
-    opt.textContent = s.title;
-    fservice.appendChild(opt);
-  });
-  const genOpt = document.createElement('option');
-  genOpt.textContent = 'Consultation générale';
-  fservice.prepend(genOpt);
+  // ---------- modal ----------
+  const overlay = document.getElementById('modalOverlay');
+  const modalIcon = document.getElementById('modalIcon');
+  const modalEyebrow = document.getElementById('modalEyebrow');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalDesc = document.getElementById('modalDesc');
+  let lastFocused = null;
 
-  // ---------- floor reveal + rail dot ----------
-  const cards = Array.from(document.querySelectorAll('.floor-card'));
-  const railDot = document.getElementById('railDot');
-  const rail = document.getElementById('elevatorRail');
+  function openModal(s){
+    lastFocused = document.activeElement;
+    modalIcon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${s.icon}</svg>`;
+    modalEyebrow.textContent = s.eyebrow;
+    modalTitle.textContent = s.title;
+    modalDesc.textContent = s.desc;
+    overlay.classList.add('open');
+    document.body.classList.add('menu-lock');
+  }
+  function closeModal(){
+    overlay.classList.remove('open');
+    document.body.classList.remove('menu-lock');
+    if(lastFocused) lastFocused.focus();
+  }
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  overlay.addEventListener('click', e=>{ if(e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', e=>{ if(e.key === 'Escape') closeModal(); });
 
-  const cardObserver = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); });
-  }, {threshold:.2});
-  cards.forEach(c=>cardObserver.observe(c));
-
-  const floorStackEl = document.getElementById('floorStack');
-  floorStackEl.addEventListener('scroll', ()=>{
-    const railH = rail.getBoundingClientRect().height;
-    const max = floorStackEl.scrollHeight - floorStackEl.clientHeight;
-    const pct = max > 0 ? floorStackEl.scrollTop / max : 0;
-    railDot.style.top = (pct * (railH - 12)) + 'px';
-  });
-
-  // ---------- scene machinery ----------
-  const body = document.body;
-  const zoomTarget = document.getElementById('zoomTarget');
-  const sceneHome = document.getElementById('scene-home');
-  const sceneServices = document.getElementById('scene-services');
-  const sceneContact = document.getElementById('scene-contact');
-
-  function setScene(name){ body.dataset.scene = name; }
-
-  // Home -> Services : fly into the building
-  document.getElementById('btnServices').addEventListener('click', ()=>{
-    zoomTarget.classList.add('zoom-in');
-    setTimeout(()=> body.classList.add('flash-on'), 700);
-    setTimeout(()=>{
-      sceneHome.classList.remove('active');
-      sceneServices.classList.add('active');
-      setScene('services');
-    }, 820);
-    setTimeout(()=> body.classList.remove('flash-on'), 1050);
+  // ---------- header scroll state ----------
+  const header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', ()=>{
+    header.classList.toggle('scrolled', window.scrollY > 40);
   });
 
-  // Services -> Home : fly back out
-  function backToHome(){
-    sceneServices.classList.remove('active');
-    sceneHome.classList.add('active');
-    setScene('home');
-    body.classList.add('flash-on');
-    requestAnimationFrame(()=>{
-      setTimeout(()=> body.classList.remove('flash-on'), 60);
-      setTimeout(()=> zoomTarget.classList.remove('zoom-in'), 90);
+  // ---------- nav pill / scrollspy ----------
+  const navLinks = document.querySelectorAll('.nav-link');
+  const navPill = document.getElementById('navPill');
+  const sections = ['home','services','contact'].map(id=>document.getElementById(id));
+
+  function movePill(link){
+    if(!link) return;
+    navPill.style.left = link.offsetLeft + 'px';
+    navPill.style.width = link.offsetWidth + 'px';
+  }
+  function setActive(id){
+    navLinks.forEach(l=>l.classList.toggle('active', l.dataset.target === id));
+    movePill(document.querySelector(`.nav-link[data-target="${id}"]`));
+  }
+  window.addEventListener('load', ()=>setActive('home'));
+  window.addEventListener('resize', ()=>{
+    const active = document.querySelector('.nav-link.active');
+    movePill(active);
+  });
+
+  const spy = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting) setActive(e.target.id);
     });
-  }
-  document.getElementById('backFromServices').addEventListener('click', backToHome);
+  }, {threshold:0.5});
+  sections.forEach(s=>spy.observe(s));
 
-  // Home -> Contact : glass doors open
-  function openReception(){
-    sceneContact.classList.add('active');
-    body.classList.remove('doors-open');
-    void sceneContact.offsetWidth; // reflow so doors start closed
-    requestAnimationFrame(()=> body.classList.add('doors-open'));
-    setTimeout(()=>{
-      sceneHome.classList.remove('active');
-      sceneServices.classList.remove('active');
-      setScene('contact');
-    }, 260);
-  }
-  document.getElementById('btnContact').addEventListener('click', openReception);
-  document.getElementById('btnContactFromServices').addEventListener('click', openReception);
+  // ---------- reveal on scroll ----------
+  const revealEls = document.querySelectorAll('.reveal, .reveal-scale');
+  const revealObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('in');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, {threshold:0.15, rootMargin:'0px 0px -60px 0px'});
+  revealEls.forEach(el=>revealObserver.observe(el));
 
-  // Contact -> back (Home)
-  document.getElementById('backFromContact').addEventListener('click', ()=>{
-    body.classList.remove('doors-open');
-    sceneContact.classList.remove('active');
-    sceneHome.classList.add('active');
-    setScene('home');
-  });
+  // ---------- mobile menu ----------
+  const burger = document.getElementById('burgerBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const menuBackdrop = document.getElementById('menuBackdrop');
+
+  function toggleMenu(open){
+    mobileMenu.classList.toggle('open', open);
+    menuBackdrop.classList.toggle('open', open);
+    document.body.classList.toggle('menu-lock', open);
+  }
+  burger.addEventListener('click', ()=>toggleMenu(!mobileMenu.classList.contains('open')));
+  menuBackdrop.addEventListener('click', ()=>toggleMenu(false));
+  document.querySelectorAll('.mm-link').forEach(a=>a.addEventListener('click', ()=>toggleMenu(false)));
 
   // ---------- contact form (front-end only) ----------
   const form = document.getElementById('contactForm');

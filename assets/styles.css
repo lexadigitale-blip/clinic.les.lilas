@@ -406,15 +406,26 @@
     .nav-links{display:none;}
     .nav-book-btn{display:none;}
     .burger{display:flex;}
-    .hero{padding-top:104px;}
-    .card-stack{max-width:250px;aspect-ratio:1/1.3;margin:0 auto;}
-    .rx-card{display:none;}
+    .hero{padding-top:104px;min-height:auto;padding-bottom:56px;}
+    .hero-grid{text-align:center;}
+    .hero p.lede{margin-left:auto;margin-right:auto;}
+    .hero-visual{display:none;}
     .scroll-cue{display:none;}
-    .stat-row{margin-top:32px;gap:22px;row-gap:18px;}
-    .rx-inner{padding:20px;}
-    .rx-inner h4{font-size:.92rem;}
-    .rx-line{height:7px;margin-bottom:8px;}
-    .pulse-dot{display:none;}
+    .hero-actions{justify-content:center;margin-top:32px;}
+    .stat-row{
+      display:flex;flex-wrap:nowrap;justify-content:space-between;
+      margin-top:36px;gap:0;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:18px;padding:18px 8px;
+    }
+    .stat{flex:1;position:relative;padding:0 6px;}
+    .stat:not(:last-child)::after{
+      content:"";position:absolute;top:50%;right:0;transform:translateY(-50%);
+      width:1px;height:30px;background:rgba(255,255,255,.16);
+    }
+    .stat b{font-size:1.5rem;}
+    .stat span{font-size:.66rem;line-height:1.3;display:block;}
     .platforms{padding:56px 0 40px;}
     .services{padding:64px 0 96px;}
     .section-head{margin-bottom:36px;}

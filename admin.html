@@ -144,6 +144,8 @@
   .msg-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:6px;}
   .msg-top b{font-size:.94rem;}
   .msg-top .badge{font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--purple-600);background:var(--pink-100);padding:2px 8px;border-radius:999px;}
+  .msg-top .badge-ia{font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,var(--purple-600),var(--purple-500));padding:2px 9px;border-radius:999px;}
+  .msg-text.ia-brief{background:var(--pink-50);border:1px dashed rgba(139,44,107,.25);border-radius:12px;padding:10px 12px;}
   .msg-meta{font-size:.78rem;color:var(--ink-soft);margin-bottom:8px;}
   .msg-text{font-size:.88rem;color:var(--ink);line-height:1.5;}
   .msg-date{font-size:.74rem;color:var(--ink-soft);white-space:nowrap;}
@@ -483,10 +485,11 @@
         <div>
           <div class="msg-top">
             <b>${escapeHtml(m.name || 'Sans nom')}</b>
+            ${m.source === 'ia' ? '<span class="badge-ia">Assistant IA</span>' : ''}
             ${m.read ? '' : '<span class="badge">Nouveau</span>'}
           </div>
           <div class="msg-meta">${escapeHtml(m.phone || '—')} · ${escapeHtml(m.service || 'Consultation générale')}</div>
-          <div class="msg-text">${escapeHtml(m.message || '(pas de message)')}</div>
+          <div class="msg-text${m.source === 'ia' ? ' ia-brief' : ''}">${escapeHtml(m.message || '(pas de message)')}</div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
           <span class="msg-date">${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</span>

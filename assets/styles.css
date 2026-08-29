@@ -1,5 +1,4 @@
-
-  :root{
+:root{
     --purple-950:#1A0F1F;
     --purple-900:#241129;
     --purple-800:#3E1739;
@@ -409,6 +408,7 @@
     .burger{display:flex;}
     .hero{padding-top:104px;}
     .card-stack{max-width:250px;aspect-ratio:1/1.3;margin:0 auto;}
+    .rx-card{display:none;}
     .scroll-cue{display:none;}
     .stat-row{margin-top:32px;gap:22px;row-gap:18px;}
     .rx-inner{padding:20px;}

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clinique Les Lilas — Panneau d'administration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,560;0,9..144,650&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="./assets/lilas-data.js"></script>
+<style>
+  :root{
+    --purple-950:#1A0F1F; --purple-900:#241129; --purple-800:#3E1739;
+    --purple-600:#8B2C6B; --purple-500:#A73B82;
+    --pink-300:#F3B8D4; --pink-200:#F7CFE1; --pink-100:#FBEAF3; --pink-50:#FEF6FA;
+    --white:#FFFFFF; --ink:#2A1830; --ink-soft:#6b5468;
+    --line:#EADCE6; --panel:#FFFFFF;
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Manrope',sans-serif;background:var(--pink-50);color:var(--ink);min-height:100vh;}
+  h1,h2,h3,.display{font-family:'Fraunces',serif;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  input,select,textarea{font-family:inherit;}
+  ::selection{background:var(--purple-600);color:#fff;}
+
+  /* ---------- login gate ---------- */
+  #gate{
+    position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(ellipse 90% 60% at 15% 0%, #3E1739 0%, var(--purple-950) 55%);
+  }
+  .gate-card{
+    width:100%;max-width:380px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);
+    border-radius:22px;padding:36px;backdrop-filter:blur(14px);color:#fff;
+  }
+  .gate-card .clover{width:32px;height:32px;margin-bottom:16px;}
+  .gate-card h1{font-size:1.4rem;font-weight:650;margin-bottom:6px;}
+  .gate-card p{font-size:.88rem;color:rgba(255,255,255,.65);margin-bottom:22px;line-height:1.5;}
+  .gate-card input{
+    width:100%;padding:13px 14px;border-radius:12px;background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.22);color:#fff;font-size:.95rem;margin-bottom:14px;
+  }
+  .gate-card input::placeholder{color:rgba(255,255,255,.4);}
+  .gate-card input:focus{outline:none;border-color:var(--pink-300);}
+  .gate-btn{
+    width:100%;padding:13px;border-radius:999px;font-weight:700;font-size:.92rem;text-align:center;
+    background:linear-gradient(135deg,var(--purple-600),var(--purple-500));color:#fff;
+    transition:transform .35s var(--ease);
+  }
+  .gate-btn:hover{transform:translateY(-2px);}
+  .gate-err{font-size:.82rem;color:var(--pink-300);margin-top:12px;min-height:1.2em;}
+  .gate-note{font-size:.72rem;color:rgba(255,255,255,.42);margin-top:20px;line-height:1.5;}
+
+  /* ---------- shell ---------- */
+  #app{display:none;min-height:100vh;}
+  #app.show{display:block;}
+
+  header{
+    position:sticky;top:0;z-index:50;background:var(--purple-950);color:#fff;
+    padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand svg{width:26px;height:26px;}
+  .brand b{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:650;}
+  .brand span{display:block;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--pink-200);}
+  .logout-btn{
+    display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;font-size:.82rem;font-weight:700;
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);transition:background .3s ease;
+  }
+  .logout-btn:hover{background:rgba(255,255,255,.15);}
+  .logout-btn svg{width:14px;height:14px;}
+
+  .tabs{display:flex;gap:6px;padding:18px 28px 0;max-width:1180px;margin:0 auto;}
+  .tab-btn{
+    padding:11px 18px;border-radius:12px 12px 0 0;font-size:.88rem;font-weight:700;color:var(--ink-soft);
+    border-bottom:2px solid transparent;transition:color .25s ease, border-color .25s ease;
+  }
+  .tab-btn.active{color:var(--purple-600);border-color:var(--purple-600);}
+  .tab-btn .count{
+    display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:.7rem;
+    background:var(--pink-100);color:var(--purple-600);
+  }
+
+  main{max-width:1180px;margin:0 auto;padding:26px 28px 80px;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .panel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap;}
+  .panel-head h2{font-size:1.4rem;font-weight:650;}
+  .panel-head p{font-size:.86rem;color:var(--ink-soft);margin-top:4px;}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:999px;font-weight:700;font-size:.86rem;
+    transition:transform .35s var(--ease), box-shadow .35s var(--ease);
+  }
+  .btn-primary{background:linear-gradient(135deg,var(--purple-600),var(--purple-500));color:#fff;box-shadow:0 8px 22px -8px rgba(139,44,107,.5);}
+  .btn-primary:hover{transform:translateY(-2px);}
+  .btn-ghost{border:1.5px solid var(--line);color:var(--purple-600);}
+  .btn-ghost:hover{background:var(--pink-100);}
+  .btn svg{width:14px;height:14px;}
+  .btn-danger{color:#B23A5A;}
+
+  /* ---------- services list ---------- */
+  .svc-row{
+    display:grid;grid-template-columns:44px 1fr auto;gap:16px;align-items:center;
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:10px;
+  }
+  .svc-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--purple-600),var(--purple-500));display:flex;align-items:center;justify-content:center;}
+  .svc-icon svg{width:20px;height:20px;color:#fff;}
+  .svc-row h3{font-size:.98rem;font-weight:700;}
+  .svc-row .tag{font-size:.76rem;color:var(--purple-600);font-weight:700;margin-top:2px;}
+  .svc-row .desc{font-size:.82rem;color:var(--ink-soft);margin-top:4px;max-width:60ch;}
+  .row-actions{display:flex;gap:8px;flex-shrink:0;}
+  .icon-btn{
+    width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--line);transition:background .25s ease,border-color .25s ease;
+  }
+  .icon-btn:hover{background:var(--pink-100);border-color:var(--purple-500);}
+  .icon-btn svg{width:15px;height:15px;}
+
+  .empty{
+    text-align:center;padding:60px 20px;color:var(--ink-soft);border:1.5px dashed var(--line);border-radius:16px;
+  }
+  .empty svg{width:34px;height:34px;margin:0 auto 14px;color:var(--purple-500);opacity:.6;}
+
+  /* ---------- contact form ---------- */
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:26px;max-width:640px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:.76rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:7px;}
+  .field input, .field textarea{
+    width:100%;padding:11px 13px;border-radius:11px;border:1.5px solid var(--line);font-size:.92rem;color:var(--ink);
+    transition:border-color .25s ease;
+  }
+  .field input:focus, .field textarea:focus{outline:none;border-color:var(--purple-500);}
+  .phone-row{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px;}
+  .phone-row .field{margin-bottom:0;}
+  .save-note{font-size:.84rem;color:var(--purple-600);margin-top:14px;min-height:1.2em;font-weight:700;}
+
+  /* ---------- messages table ---------- */
+  .msg-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-bottom:10px;
+    display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;
+  }
+  .msg-card.unread{border-color:var(--purple-500);background:var(--pink-100);}
+  .msg-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:6px;}
+  .msg-top b{font-size:.94rem;}
+  .msg-top .badge{font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--purple-600);background:var(--pink-100);padding:2px 8px;border-radius:999px;}
+  .msg-top .badge-ia{font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,var(--purple-600),var(--purple-500));padding:2px 9px;border-radius:999px;}
+  .msg-text.ia-brief{background:var(--pink-50);border:1px dashed rgba(139,44,107,.25);border-radius:12px;padding:10px 12px;}
+  .msg-meta{font-size:.78rem;color:var(--ink-soft);margin-bottom:8px;}
+  .msg-text{font-size:.88rem;color:var(--ink);line-height:1.5;}
+  .msg-date{font-size:.74rem;color:var(--ink-soft);white-space:nowrap;}
+
+  /* ---------- modal ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;
+    background:rgba(26,15,31,.55);backdrop-filter:blur(4px);
+    opacity:0;visibility:hidden;transition:opacity .3s ease, visibility .3s ease;
+  }
+  .modal-overlay.open{opacity:1;visibility:visible;}
+  .modal-card{
+    width:100%;max-width:520px;max-height:88vh;overflow-y:auto;background:var(--panel);border-radius:22px;padding:30px;
+    transform:translateY(16px) scale(.98);transition:transform .35s var(--ease);
+  }
+  .modal-overlay.open .modal-card{transform:translateY(0) scale(1);}
+  .modal-card h3{font-size:1.15rem;font-weight:650;margin-bottom:18px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px;}
+
+  @media(max-width:640px){
+    .svc-row{grid-template-columns:1fr;}
+    .row-actions{justify-self:flex-start;}
+    .phone-row{grid-template-columns:1fr;}
+    .msg-card{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN GATE ================= -->
+<div id="gate">
+  <div class="gate-card">
+    <svg class="clover" viewBox="0 0 60 60" fill="none">
+      <circle cx="21" cy="21" r="14" fill="#F3B8D4"/><circle cx="39" cy="21" r="14" fill="#8B2C6B"/>
+      <circle cx="21" cy="39" r="14" fill="#8B2C6B"/><circle cx="39" cy="39" r="14" fill="#F3B8D4"/>
+    </svg>
+    <h1>Administration</h1>
+    <p>Clinique Les Lilas — accès réservé à l'équipe. Entrez le mot de passe pour gérer les services, les coordonnées et les demandes reçues.</p>
+    <input id="gatePwd" type="password" placeholder="Mot de passe" autocomplete="off">
+    <button class="gate-btn" id="gateBtn" type="button">Se connecter</button>
+    <div class="gate-err" id="gateErr"></div>
+    <p class="gate-note">Ce mot de passe est vérifié uniquement dans le navigateur (le site est statique, sans serveur) — il évite les erreurs accidentelles, mais ne constitue pas une sécurité forte. Pour un vrai contrôle d'accès, hébergez ce fichier derrière une authentification côté serveur.</p>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app">
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 60 60" fill="none">
+        <circle cx="21" cy="21" r="14" fill="#F3B8D4"/><circle cx="39" cy="21" r="14" fill="#8B2C6B"/>
+        <circle cx="21" cy="39" r="14" fill="#8B2C6B"/><circle cx="39" cy="39" r="14" fill="#F3B8D4"/>
+      </svg>
+      <div><b>Clinique Les Lilas</b><span>Panneau d'administration</span></div>
+    </div>
+    <button class="logout-btn" id="logoutBtn" type="button" style="margin-left:auto;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Déconnexion
+    </button>
+  </header>
+  <div style="max-width:1180px;margin:14px auto 0;padding:0 28px;">
+    <a href="index.html" style="font-size:.82rem;font-weight:700;color:var(--purple-600);">← Voir le site public</a>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="services" type="button">Services</button>
+    <button class="tab-btn" data-tab="contact" type="button">Contact &amp; coordonnées</button>
+    <button class="tab-btn" data-tab="messages" type="button">Demandes reçues <span class="count" id="msgCount">0</span></button>
+  </nav>
+
+  <main>
+    <!-- ---- SERVICES ---- -->
+    <section class="panel active" id="panel-services">
+      <div class="panel-head">
+        <div>
+          <h2>Spécialités médicales</h2>
+          <p>Ce que les visiteurs voient dans les « étages » de la clinique, dans cet ordre.</p>
+        </div>
+        <button class="btn btn-primary" id="addServiceBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+          Ajouter un service
+        </button>
+      </div>
+      <div id="servicesList"></div>
+    </section>
+
+    <!-- ---- CONTACT ---- -->
+    <section class="panel" id="panel-contact">
+      <div class="panel-head">
+        <div>
+          <h2>Coordonnées</h2>
+          <p>Adresse et numéros affichés dans la section « Accueil » du site.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="field">
+          <label for="cAddress">Adresse</label>
+          <input id="cAddress" type="text" placeholder="Adresse complète">
+        </div>
+        <label style="display:block;font-size:.76rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:9px;">Numéros de téléphone</label>
+        <div id="phoneRows"></div>
+        <button class="btn btn-ghost" id="addPhoneBtn" type="button" style="margin-top:4px;margin-bottom:18px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+          Ajouter un numéro
+        </button>
+        <button class="btn btn-primary" id="saveContactBtn" type="button">Enregistrer les coordonnées</button>
+        <div class="save-note" id="contactSaveNote"></div>
+      </div>
+    </section>
+
+    <!-- ---- MESSAGES ---- -->
+    <section class="panel" id="panel-messages">
+      <div class="panel-head">
+        <div>
+          <h2>Demandes reçues</h2>
+          <p>Messages envoyés depuis le formulaire de contact du site public.</p>
+        </div>
+        <button class="btn btn-ghost btn-danger" id="clearMsgsBtn" type="button">Tout effacer</button>
+      </div>
+      <div id="messagesList"></div>
+    </section>
+  </main>
+</div>
+
+<!-- ================= SERVICE MODAL ================= -->
+<div class="modal-overlay" id="svcModal">
+  <div class="modal-card">
+    <h3 id="svcModalTitle">Ajouter un service</h3>
+    <div class="field">
+      <label for="svcTitle">Titre</label>
+      <input id="svcTitle" type="text" placeholder="ex. Médecin cardiologue">
+    </div>
+    <div class="field">
+      <label for="svcTag">Catégorie</label>
+      <input id="svcTag" type="text" placeholder="ex. Cœur & circulation">
+    </div>
+    <div class="field">
+      <label for="svcEyebrow">Libellé court (affiché dans la fenêtre détaillée)</label>
+      <input id="svcEyebrow" type="text" placeholder="ex. Cardiologie">
+    </div>
+    <div class="field">
+      <label for="svcDesc">Description</label>
+      <textarea id="svcDesc" rows="4" placeholder="Décrivez ce service pour les visiteurs…"></textarea>
+    </div>
+    <div class="field">
+      <label for="svcIcon">Icône (code SVG, optionnel)</label>
+      <textarea id="svcIcon" rows="2" placeholder='ex. &lt;circle cx="12" cy="12" r="9"/&gt;'></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="svcCancelBtn" type="button">Annuler</button>
+      <button class="btn btn-primary" id="svcSaveBtn" type="button">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const DEFAULT_ICON = '<path d="M12 21c-4.4-2.9-8-6.9-8-11a8 8 0 0 1 16 0c0 4.1-3.6 8.1-8 11Z"/><circle cx="12" cy="10" r="2.6"/>';
+
+  /* ================= AUTH GATE ================= */
+  const ADMIN_PASSWORD = 'lilas2026'; // change this to your own password before publishing
+  const gate = document.getElementById('gate');
+  const app = document.getElementById('app');
+  const gatePwd = document.getElementById('gatePwd');
+  const gateBtn = document.getElementById('gateBtn');
+  const gateErr = document.getElementById('gateErr');
+
+  function unlock(){
+    gate.style.display = 'none';
+    app.classList.add('show');
+    sessionStorage.setItem('lilas_admin_auth','1');
+    renderAll();
+  }
+  gateBtn.addEventListener('click', ()=>{
+    if(gatePwd.value === ADMIN_PASSWORD){ unlock(); }
+    else{ gateErr.textContent = 'Mot de passe incorrect.'; gatePwd.value=''; gatePwd.focus(); }
+  });
+  gatePwd.addEventListener('keydown', e=>{ if(e.key==='Enter') gateBtn.click(); });
+  document.getElementById('logoutBtn').addEventListener('click', ()=>{
+    sessionStorage.removeItem('lilas_admin_auth');
+    location.reload();
+  });
+  if(sessionStorage.getItem('lilas_admin_auth') === '1') unlock();
+
+  /* ================= TABS ================= */
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ================= SERVICES ================= */
+  const servicesList = document.getElementById('servicesList');
+  let editingServiceId = null;
+
+  function renderServices(){
+    const services = lilasGetServices();
+    servicesList.innerHTML = '';
+    if(services.length === 0){
+      servicesList.innerHTML = `<div class="empty">Aucun service pour l'instant. Ajoutez-en un pour qu'il apparaisse sur le site.</div>`;
+      return;
+    }
+    services.forEach(s=>{
+      const row = document.createElement('div');
+      row.className = 'svc-row';
+      row.innerHTML = `
+        <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${s.icon || DEFAULT_ICON}</svg></div>
+        <div>
+          <h3>${escapeHtml(s.title)}</h3>
+          <div class="tag">${escapeHtml(s.tag || '')}</div>
+          <div class="desc">${escapeHtml(s.desc || '')}</div>
+        </div>
+        <div class="row-actions">
+          <button class="icon-btn" data-edit="${s.id}" title="Modifier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button>
+          <button class="icon-btn" data-del="${s.id}" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg></button>
+        </div>`;
+      servicesList.appendChild(row);
+    });
+    servicesList.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click', ()=>openServiceModal(b.dataset.edit)));
+    servicesList.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click', ()=>deleteService(b.dataset.del)));
+  }
+
+  function deleteService(id){
+    if(!confirm('Supprimer ce service ? Il disparaîtra du site public.')) return;
+    const services = lilasGetServices().filter(s=>s.id !== id);
+    lilasSetServices(services);
+    renderServices();
+  }
+
+  const svcModal = document.getElementById('svcModal');
+  const svcModalTitle = document.getElementById('svcModalTitle');
+  const svcTitle = document.getElementById('svcTitle');
+  const svcTag = document.getElementById('svcTag');
+  const svcEyebrow = document.getElementById('svcEyebrow');
+  const svcDesc = document.getElementById('svcDesc');
+  const svcIcon = document.getElementById('svcIcon');
+
+  function openServiceModal(id){
+    editingServiceId = id || null;
+    if(id){
+      const s = lilasGetServices().find(x=>x.id === id);
+      svcModalTitle.textContent = 'Modifier le service';
+      svcTitle.value = s.title || '';
+      svcTag.value = s.tag || '';
+      svcEyebrow.value = s.eyebrow || '';
+      svcDesc.value = s.desc || '';
+      svcIcon.value = s.icon || '';
+    }else{
+      svcModalTitle.textContent = 'Ajouter un service';
+      svcTitle.value = ''; svcTag.value = ''; svcEyebrow.value = ''; svcDesc.value = ''; svcIcon.value = '';
+    }
+    svcModal.classList.add('open');
+    svcTitle.focus();
+  }
+  function closeServiceModal(){ svcModal.classList.remove('open'); }
+
+  document.getElementById('addServiceBtn').addEventListener('click', ()=>openServiceModal(null));
+  document.getElementById('svcCancelBtn').addEventListener('click', closeServiceModal);
+  svcModal.addEventListener('click', e=>{ if(e.target === svcModal) closeServiceModal(); });
+
+  document.getElementById('svcSaveBtn').addEventListener('click', ()=>{
+    if(!svcTitle.value.trim()){ svcTitle.focus(); return; }
+    const services = lilasGetServices();
+    if(editingServiceId){
+      const s = services.find(x=>x.id === editingServiceId);
+      s.title = svcTitle.value.trim();
+      s.tag = svcTag.value.trim();
+      s.eyebrow = svcEyebrow.value.trim();
+      s.desc = svcDesc.value.trim();
+      s.icon = svcIcon.value.trim();
+    }else{
+      services.push({
+        id: lilasUid('s'),
+        title: svcTitle.value.trim(),
+        tag: svcTag.value.trim(),
+        eyebrow: svcEyebrow.value.trim(),
+        desc: svcDesc.value.trim(),
+        icon: svcIcon.value.trim()
+      });
+    }
+    lilasSetServices(services);
+    closeServiceModal();
+    renderServices();
+  });
+
+  /* ================= CONTACT ================= */
+  const cAddress = document.getElementById('cAddress');
+  const phoneRows = document.getElementById('phoneRows');
+  const contactSaveNote = document.getElementById('contactSaveNote');
+  let phones = [];
+
+  function renderPhones(){
+    phoneRows.innerHTML = '';
+    phones.forEach((p, i)=>{
+      const row = document.createElement('div');
+      row.className = 'phone-row';
+      row.innerHTML = `
+        <div class="field"><label>Libellé</label><input type="text" value="${escapeAttr(p.label)}" data-plabel="${i}" placeholder="ex. Laboratoire"></div>
+        <div class="field"><label>Numéro</label><input type="text" value="${escapeAttr(p.number)}" data-pnumber="${i}" placeholder="05XX XX XX XX"></div>
+        <button class="icon-btn" data-premove="${i}" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>`;
+      phoneRows.appendChild(row);
+    });
+    phoneRows.querySelectorAll('[data-plabel]').forEach(inp=>inp.addEventListener('input', e=>{ phones[+e.target.dataset.plabel].label = e.target.value; }));
+    phoneRows.querySelectorAll('[data-pnumber]').forEach(inp=>inp.addEventListener('input', e=>{ phones[+e.target.dataset.pnumber].number = e.target.value; }));
+    phoneRows.querySelectorAll('[data-premove]').forEach(b=>b.addEventListener('click', e=>{
+      phones.splice(+e.target.closest('[data-premove]').dataset.premove, 1);
+      renderPhones();
+    }));
+  }
+
+  function renderContact(){
+    const contact = lilasGetContact();
+    cAddress.value = contact.address || '';
+    phones = (contact.phones || []).map(p=>({...p}));
+    renderPhones();
+    contactSaveNote.textContent = '';
+  }
+
+  document.getElementById('addPhoneBtn').addEventListener('click', ()=>{
+    phones.push({label:'', number:''});
+    renderPhones();
+  });
+  document.getElementById('saveContactBtn').addEventListener('click', ()=>{
+    lilasSetContact({ address: cAddress.value.trim(), phones: phones.filter(p=>p.label.trim() || p.number.trim()) });
+    contactSaveNote.textContent = 'Coordonnées enregistrées ✓';
+    setTimeout(()=>{ contactSaveNote.textContent=''; }, 2400);
+  });
+
+  /* ================= MESSAGES ================= */
+  const messagesList = document.getElementById('messagesList');
+  const msgCount = document.getElementById('msgCount');
+
+  function renderMessages(){
+    const messages = lilasGetMessages();
+    msgCount.textContent = messages.filter(m=>!m.read).length;
+    messagesList.innerHTML = '';
+    if(messages.length === 0){
+      messagesList.innerHTML = `<div class="empty">Aucune demande reçue pour l'instant. Les messages envoyés depuis le site public apparaîtront ici.</div>`;
+      return;
+    }
+    messages.forEach(m=>{
+      const card = document.createElement('div');
+      card.className = 'msg-card' + (m.read ? '' : ' unread');
+      const d = new Date(m.date);
+      card.innerHTML = `
+        <div>
+          <div class="msg-top">
+            <b>${escapeHtml(m.name || 'Sans nom')}</b>
+            ${m.source === 'ia' ? '<span class="badge-ia">Assistant IA</span>' : ''}
+            ${m.read ? '' : '<span class="badge">Nouveau</span>'}
+          </div>
+          <div class="msg-meta">${escapeHtml(m.phone || '—')} · ${escapeHtml(m.service || 'Consultation générale')}</div>
+          <div class="msg-text${m.source === 'ia' ? ' ia-brief' : ''}">${escapeHtml(m.message || '(pas de message)')}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+          <span class="msg-date">${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</span>
+          <div class="row-actions">
+            ${m.read ? '' : `<button class="icon-btn" data-read="${m.id}" title="Marquer comme lu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></button>`}
+            <button class="icon-btn" data-mdel="${m.id}" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg></button>
+          </div>
+        </div>`;
+      messagesList.appendChild(card);
+    });
+    messagesList.querySelectorAll('[data-read]').forEach(b=>b.addEventListener('click', ()=>{
+      const list = lilasGetMessages();
+      const m = list.find(x=>x.id === b.dataset.read);
+      if(m) m.read = true;
+      lilasSetMessages(list);
+      renderMessages();
+    }));
+    messagesList.querySelectorAll('[data-mdel]').forEach(b=>b.addEventListener('click', ()=>{
+      if(!confirm('Supprimer cette demande ?')) return;
+      lilasSetMessages(lilasGetMessages().filter(x=>x.id !== b.dataset.mdel));
+      renderMessages();
+    }));
+  }
+
+  document.getElementById('clearMsgsBtn').addEventListener('click', ()=>{
+    if(!confirm('Effacer toutes les demandes reçues ?')) return;
+    lilasSetMessages([]);
+    renderMessages();
+  });
+
+  /* ================= helpers ================= */
+  function escapeHtml(str){
+    return String(str ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function escapeAttr(str){ return escapeHtml(str); }
+
+  function renderAll(){
+    renderServices();
+    renderContact();
+    renderMessages();
+  }
+</script>
+</body>
+</html>

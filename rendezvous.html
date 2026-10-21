@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prendre rendez-vous — Clinique Les Lilas</title>
+<meta name="description" content="Réservez en ligne votre rendez-vous à la Clinique Les Lilas : choisissez la spécialité, la date et l'heure, recevez votre code de rendez-vous.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,560;0,9..144,650;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="rendezvous">
+
+<!-- ===== NAV ===== -->
+<header id="siteHeader">
+  <div class="wrap">
+    <nav>
+      <a href="index.html" class="brand">
+        <svg class="clover" viewBox="0 0 60 60" fill="none">
+          <circle class="petal" cx="21" cy="21" r="14" fill="#F3B8D4"/>
+          <circle class="petal" cx="39" cy="21" r="14" fill="#8B2C6B"/>
+          <circle class="petal" cx="21" cy="39" r="14" fill="#8B2C6B"/>
+          <circle class="petal" cx="39" cy="39" r="14" fill="#F3B8D4"/>
+        </svg>
+        <span class="brand-text"><b>Les Lilas</b><span>Clinique de diagnostic médical</span></span>
+      </a>
+
+      <div class="nav-links" id="navLinks">
+        <div class="nav-pill" id="navPill"></div>
+        <a href="index.html" class="nav-link" data-target="home">Accueil</a>
+        <a href="services.html" class="nav-link" data-target="services">Services</a>
+        <a href="assistant.html" class="nav-link" data-target="assistant">Assistant</a>
+        <a href="rendezvous.html" class="nav-link" data-target="rendezvous">Rendez-vous</a>
+      </div>
+
+      <div class="nav-cta">
+        <a href="tel:0560140140" class="nav-phone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          0560 14 01 40
+        </a>
+        <a href="rendezvous.html" class="btn btn-primary nav-book-btn" style="padding:11px 22px;font-size:.85rem;">Prendre RDV</a>
+        <button class="burger" id="burgerBtn" aria-label="Menu"><span></span><span></span><span></span></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<div class="menu-backdrop" id="menuBackdrop"></div>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html" class="mm-link">Accueil</a>
+  <a href="services.html" class="mm-link">Services</a>
+  <a href="assistant.html" class="mm-link">Assistant</a>
+  <a href="rendezvous.html" class="mm-link">Rendez-vous</a>
+  <a href="tel:0560140140" class="btn btn-primary">Appeler la clinique</a>
+</div>
+
+<!-- ===== LIVE STRIP ===== -->
+<div class="rv-strip">
+  <span class="rs" data-live-dot><i></i><span class="live-label">Horaires…</span></span>
+  <span class="rs">Attente estimée aujourd'hui&nbsp;: <b data-wait>—</b></span>
+  <span class="rs">Confirmation par l'accueil sous 24h</span>
+</div>
+
+<!-- ===== PAGE HERO ===== -->
+<section class="page-hero">
+  <div class="wrap">
+    <div class="breadcrumb"><a href="index.html">Accueil</a> / Rendez-vous</div>
+    <div class="eyebrow">Réservation en ligne</div>
+    <h1>Votre créneau, en trois étapes.</h1>
+    <p>Choisissez la spécialité, la date et l'heure : vous recevez immédiatement un code de rendez-vous. L'accueil confirme ensuite par téléphone — et vous pouvez suivre l'état de votre demande à tout moment.</p>
+  </div>
+</section>
+
+<!-- ===== BOOKING WIZARD ===== -->
+<section class="bk-wrap">
+  <div class="wrap bk-grid">
+
+    <!-- ---------- left: wizard ---------- -->
+    <div>
+      <div class="bk-card" id="wizard">
+        <div class="bk-steps">
+          <div class="bk-step" data-step="1"><b>1</b> Spécialité</div>
+          <div class="bk-step" data-step="2"><b>2</b> Date &amp; heure</div>
+          <div class="bk-step" data-step="3"><b>3</b> Vos coordonnées</div>
+        </div>
+
+        <!-- STEP 1 : spécialité + praticien -->
+        <div class="bk-panel" data-panel="1">
+          <div class="bk-title">Quelle spécialité souhaitez-vous consulter ?</div>
+          <p class="bk-hint">Vous hésitez ? L'<a href="assistant.html" style="color:var(--purple-600);font-weight:800;">assistant d'orientation</a> vous guide en quelques questions.</p>
+          <div class="pill-grid" id="serviceGrid"></div>
+
+          <div id="practitionerWrap" style="display:none;">
+            <div class="bk-title" style="font-size:1.05rem;margin-top:28px;">Praticien souhaité <span style="font-weight:500;color:var(--ink-soft);font-size:.85rem;">(facultatif)</span></div>
+            <div class="pill-grid" id="practitionerGrid"></div>
+          </div>
+
+          <div class="bk-nav">
+            <span></span>
+            <button class="btn btn-primary" id="toStep2" type="button">
+              Choisir la date
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2 : calendrier + créneaux -->
+        <div class="bk-panel" data-panel="2">
+          <div class="bk-title">Quand souhaitez-vous venir ?</div>
+          <p class="bk-hint">Les jours grisés sont fermés ou complets. Les places restantes sont indiquées sous chaque jour.</p>
+
+          <div class="cal-head">
+            <div class="cal-title" id="calTitle">—</div>
+            <div class="cal-nav">
+              <button type="button" id="calPrev" aria-label="Mois précédent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></button>
+              <button type="button" id="calNext" aria-label="Mois suivant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></button>
+            </div>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div class="cal-legend">
+            <span><i style="background:var(--ok)"></i> créneaux disponibles</span>
+            <span><i style="background:var(--bad)"></i> complet</span>
+            <span><i style="background:rgba(42,24,48,.2)"></i> fermé</span>
+          </div>
+
+          <div id="slotArea" style="margin-top:6px;"></div>
+
+          <div class="bk-nav">
+            <button class="btn btn-ghost" data-goto="1" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+              Retour
+            </button>
+            <button class="btn btn-primary" id="toStep3" type="button" disabled>
+              Continuer
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3 : coordonnées -->
+        <div class="bk-panel" data-panel="3">
+          <div class="bk-title">À qui réservons-nous ce créneau ?</div>
+          <p class="bk-hint">Ces informations servent uniquement à l'accueil pour confirmer votre rendez-vous.</p>
+
+          <div class="form-2col">
+            <div class="bk-field">
+              <label for="bkName">Nom complet *</label>
+              <input id="bkName" type="text" placeholder="ex. Samira Benali" autocomplete="name">
+            </div>
+            <div class="bk-field">
+              <label for="bkPhone">Téléphone *</label>
+              <input id="bkPhone" type="tel" placeholder="05XX XX XX XX" autocomplete="tel">
+            </div>
+          </div>
+
+          <div class="form-2col">
+            <div class="bk-field">
+              <label for="bkEmail">E-mail <span style="text-transform:none;letter-spacing:0;font-weight:600;">(facultatif)</span></label>
+              <input id="bkEmail" type="email" placeholder="vous@exemple.com" autocomplete="email">
+            </div>
+            <div class="bk-field">
+              <label>Me rappeler par</label>
+              <div class="reminder-opts">
+                <label><input type="radio" name="reminder" value="tel" checked> Téléphone</label>
+                <label><input type="radio" name="reminder" value="sms"> SMS</label>
+                <label><input type="radio" name="reminder" value="email"> E-mail</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="bk-field">
+            <label for="bkNote">Motif de la consultation</label>
+            <textarea id="bkNote" placeholder="Décrivez en quelques mots le motif, les symptômes ou les examens à revoir…"></textarea>
+            <div class="hint">Utile pour préparer le dossier et éviter de repasser par l'assistant.</div>
+          </div>
+
+          <div class="bk-err" id="bkErr"></div>
+
+          <div class="bk-nav">
+            <button class="btn btn-ghost" data-goto="2" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+              Retour
+            </button>
+            <button class="btn btn-primary" id="bkSubmit" type="button">
+              Confirmer le rendez-vous
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4 : ticket -->
+      <div id="ticketArea" style="display:none;"></div>
+    </div>
+
+    <!-- ---------- right: summary ---------- -->
+    <aside class="bk-side">
+      <div class="sum-card">
+        <h4>Votre demande</h4>
+        <div class="sum-rows">
+          <div class="sum-row"><span>Spécialité</span><b id="sumService" class="empty">à choisir</b></div>
+          <div class="sum-row"><span>Praticien</span><b id="sumTeam" class="empty">au premier disponible</b></div>
+          <div class="sum-row"><span>Date</span><b id="sumDate" class="empty">à choisir</b></div>
+          <div class="sum-row"><span>Heure</span><b id="sumTime" class="empty">à choisir</b></div>
+          <div class="sum-row"><span>Durée</span><b id="sumDur">30 min</b></div>
+        </div>
+        <a href="tel:0560140140" class="btn btn-primary sum-cta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Préférez-vous appeler ?
+        </a>
+        <p class="sum-note">Aucun paiement en ligne. Votre réservation est gratuite et sans engagement : elle est confirmée par l'accueil sous 24h ouvrées.</p>
+      </div>
+
+      <div class="help-card">
+        <h4>À apporter le jour J</h4>
+        <a href="services.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M12 18v-6M9 15h6"/></svg>
+          Ordonnances et anciens résultats
+        </a>
+        <a href="tel:0560140140">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Votre code de rendez-vous
+        </a>
+        <p>Pour les analyses à jeun, présentez-vous entre 7h30 et 9h30. Un accompagnant est autorisé en salle d'attente.</p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ===== SUIVI ===== -->
+<section class="bk-wrap" id="suivi" style="background:linear-gradient(180deg,#fff,var(--pink-50));padding-top:0;">
+  <div class="wrap">
+    <div class="lookup-card">
+      <div class="sec-top"><i></i>Suivi</div>
+      <div class="bk-title" style="margin-top:12px;">Où en est mon rendez-vous ?</div>
+      <p class="bk-hint">Entrez le code reçu à la confirmation (format <b>LL-XXXXX</b>) pour voir l'état de votre demande : à confirmer, confirmé, terminé ou annulé.</p>
+      <form class="lookup-form" id="lookupForm">
+        <input id="lookupInput" type="text" placeholder="LL-XXXXX" autocomplete="off" aria-label="Code de rendez-vous">
+        <button class="btn btn-primary" type="submit">
+          Consulter
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+      <div class="lookup-out" id="lookupOut"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-grid">
+    <a href="index.html" class="brand">
+      <svg class="clover" viewBox="0 0 60 60" fill="none" style="width:26px;height:26px;">
+        <circle cx="21" cy="21" r="14" fill="#F3B8D4"/>
+        <circle cx="39" cy="21" r="14" fill="#8B2C6B"/>
+        <circle cx="21" cy="39" r="14" fill="#8B2C6B"/>
+        <circle cx="39" cy="39" r="14" fill="#F3B8D4"/>
+      </svg>
+      <span class="brand-text"><b>Clinique Les Lilas</b></span>
+    </a>
+    <small>© 2026 Clinique de diagnostic médical Les Lilas — Haï El Yasmine.</small>
+    <div class="social">
+      <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="3.5"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+      <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/lilas-data.js"></script>
+<script src="assets/site.js"></script>
+<script>
+(function(){
+  lilasSeedDemo();
+  const esc = escapeHtmlShared;
+  const $ = id => document.getElementById(id);
+  const settings = lilasGetSettings();
+  const services = lilasGetServices();
+  const team = lilasGetTeam();
+  const DEFAULT_ICON = '<path d="M12 21c-4.4-2.9-8-6.9-8-11a8 8 0 0 1 16 0c0 4.1-3.6 8.1-8 11Z"/><circle cx="12" cy="10" r="2.6"/>';
+
+  /* ---------------- state ---------------- */
+  const state = { service:'', team:'', date:'', time:'', calMonth:lilasYmd(new Date()).slice(0,7) };
+
+  /* ---------------- steps ---------------- */
+  function gotoStep(n){
+    document.querySelectorAll('.bk-panel').forEach(p=>p.classList.toggle('active', +p.dataset.panel === n));
+    document.querySelectorAll('.bk-step').forEach(s=>{
+      const i = +s.dataset.step;
+      s.classList.toggle('active', i === n);
+      s.classList.toggle('done', i < n);
+    });
+    const top = document.getElementById('wizard').getBoundingClientRect().top + window.scrollY - 120;
+    if(window.scrollY > top || window.scrollY < top - 300) window.scrollTo({top:top, behavior:'smooth'});
+  }
+  document.querySelectorAll('[data-goto]').forEach(b=> b.addEventListener('click', ()=> gotoStep(+b.dataset.goto)));
+  gotoStep(1);
+
+  /* ---------------- summary ---------------- */
+  function paintSummary(){
+    const set = (id, val, fallback)=>{
+      const el = $(id);
+      el.textContent = val || fallback;
+      el.classList.toggle('empty', !val);
+    };
+    set('sumService', state.service, 'à choisir');
+    set('sumTeam', state.team, 'au premier disponible');
+    set('sumDate', state.date ? lilasDateLabel(state.date) + ' ' + lilasParseYmd(state.date).getDate() + ' ' + LILAS_MONTHS[lilasParseYmd(state.date).getMonth()] : '', 'à choisir');
+    set('sumTime', state.time, 'à choisir');
+    $('sumDur').textContent = (settings.booking.slotMinutes || 30) + ' min';
+  }
+
+  /* ---------------- step 1 : services ---------------- */
+  const serviceGrid = $('serviceGrid');
+  const svcOptions = [{ id:'general', title:'Consultation générale', tag:'Avis médical complet', eyebrow:'Consultation', group:'consultation', icon:DEFAULT_ICON }]
+    .concat(services);
+  svcOptions.forEach(s=>{
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'pill-opt'; b.dataset.service = s.title;
+    b.innerHTML = '<span class="pi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">' + (s.icon || DEFAULT_ICON) + '</svg></span>' +
+      '<span><b>' + esc(s.title) + '</b><small>' + esc(s.tag || s.eyebrow || '') + '</small></span>';
+    b.addEventListener('click', ()=>{
+      state.service = s.title;
+      document.querySelectorAll('#serviceGrid .pill-opt').forEach(x=> x.classList.toggle('on', x === b));
+      paintPractitioners(s);
+      paintSummary();
+    });
+    serviceGrid.appendChild(b);
+  });
+
+  function paintPractitioners(svc){
+    const wrap = $('practitionerWrap'), grid = $('practitionerGrid');
+    const matches = team.filter(t => t.serviceId === svc.id || t.role === svc.eyebrow || t.role === svc.title);
+    grid.innerHTML = '';
+    state.team = '';
+    if(!matches.length){ wrap.style.display = 'none'; paintSummary(); return; }
+    wrap.style.display = '';
+    const any = document.createElement('button');
+    any.type = 'button'; any.className = 'pill-opt on';
+    any.innerHTML = '<span class="pi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span><b>Premier disponible</b><small>le plus tôt possible</small></span>';
+    any.addEventListener('click', ()=>{
+      state.team = '';
+      grid.querySelectorAll('.pill-opt').forEach(x=> x.classList.toggle('on', x === any));
+      paintSummary();
+    });
+    grid.appendChild(any);
+    matches.forEach(t=>{
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'pill-opt';
+      b.innerHTML = '<span class="pi" style="font-weight:800;font-size:.8rem;">' + esc(lilasInitials(t.name)) + '</span>' +
+        '<span><b>' + esc(t.name) + '</b><small>' + esc(t.role || '') + (t.room ? ' · ' + esc(t.room) : '') + '</small></span>';
+      b.addEventListener('click', ()=>{
+        state.team = t.name;
+        grid.querySelectorAll('.pill-opt').forEach(x=> x.classList.toggle('on', x === b));
+        paintSummary();
+      });
+      grid.appendChild(b);
+    });
+    paintSummary();
+  }
+
+  $('toStep2').addEventListener('click', ()=>{
+    if(!state.service){ toast('Choisissez d\'abord une spécialité.'); serviceGrid.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+    renderCalendar();
+    gotoStep(2);
+  });
+
+  /* ---------------- step 2 : calendar ---------------- */
+  function slotsFree(ymd){ return lilasSlotsFor(ymd).filter(s=>!s.full && !s.past); }
+
+  function renderCalendar(){
+    const [y, m] = state.calMonth.split('-').map(Number);
+    const first = new Date(y, m-1, 1);
+    $('calTitle').textContent = LILAS_MONTHS[m-1] + ' ' + y;
+    const grid = $('calGrid');
+    grid.innerHTML = '';
+    ['L','M','M','J','V','S','D'].forEach(d=>{
+      const el = document.createElement('div');
+      el.className = 'cal-dow'; el.textContent = d;
+      grid.appendChild(el);
+    });
+    const offset = (first.getDay() + 6) % 7; /* lundi = 1ère colonne */
+    for(let i=0;i<offset;i++) grid.appendChild(document.createElement('div'));
+
+    const days = new Date(y, m, 0).getDate();
+    const today = lilasToday();
+    const maxDate = lilasAddDays(today, Math.max(1, settings.booking.daysAhead || 30));
+    for(let d=1; d<=days; d++){
+      const ymd = lilasYmd(new Date(y, m-1, d));
+      const open = lilasHoursFor(ymd);
+      const free = open ? slotsFree(ymd) : [];
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'cal-day';
+      if(!open || ymd < today || ymd > maxDate || !free.length){
+        btn.classList.add(open && ymd <= maxDate && ymd >= today ? 'full' : 'off');
+        btn.disabled = true;
+      } else {
+        btn.classList.add('has');
+      }
+      if(ymd === today) btn.classList.add('today');
+      if(ymd === state.date) btn.classList.add('sel');
+      const dots = Math.min(3, free.length);
+      btn.innerHTML = '<span>' + d + '</span><span class="cd-dots">' +
+        (free.length ? '<i></i>'.repeat(dots) : '<i></i>') + '</span>';
+      btn.setAttribute('aria-label', d + ' — ' + (free.length ? free.length + ' créneaux' : 'indisponible'));
+      btn.addEventListener('click', ()=>{
+        state.date = ymd; state.time = '';
+        renderCalendar(); renderSlots(); paintSummary();
+        $('toStep3').disabled = true;
+      });
+      grid.appendChild(btn);
+    }
+    const cur = state.calMonth;
+    $('calPrev').disabled = cur <= lilasYmd(new Date()).slice(0,7);
+    $('calNext').disabled = cur >= maxDate.slice(0,7);
+  }
+
+  $('calPrev').addEventListener('click', ()=>{
+    const [y,m] = state.calMonth.split('-').map(Number);
+    const d = new Date(y, m-2, 1);
+    state.calMonth = lilasYmd(d).slice(0,7);
+    renderCalendar();
+  });
+  $('calNext').addEventListener('click', ()=>{
+    const [y,m] = state.calMonth.split('-').map(Number);
+    const d = new Date(y, m, 1);
+    state.calMonth = lilasYmd(d).slice(0,7);
+    renderCalendar();
+  });
+
+  function renderSlots(){
+    const area = $('slotArea');
+    if(!state.date){ area.innerHTML = ''; return; }
+    const slots = lilasSlotsFor(state.date);
+    const open = slots.filter(s=>!s.past);
+    if(!slots.length){
+      area.innerHTML = '<div class="bk-empty" style="margin-top:20px;">La clinique est fermée ce jour-là. Choisissez une autre date.</div>';
+      return;
+    }
+    if(!open.length){
+      area.innerHTML = '<div class="bk-empty" style="margin-top:20px;">Tous les créneaux de ce jour sont passés ou complets. Choisissez une autre date.</div>';
+      return;
+    }
+    const now = new Date();
+    const isToday = state.date === lilasToday();
+    const morning = open.filter(s=> lilasMin(s.time) < 720);
+    const afternoon = open.filter(s=> lilasMin(s.time) >= 720);
+    const build = (title, list)=>{
+      if(!list.length) return '';
+      return '<div class="slot-group"><h4>' + title + '</h4><div class="slot-grid">' +
+        list.map(s=>{
+          const isNext = isToday && lilasMin(s.time) > now.getHours()*60 + now.getMinutes();
+          return '<button type="button" class="slot-btn' + (state.time === s.time ? ' sel' : '') + '" data-time="' + s.time + '"' + (s.full ? ' disabled' : '') + '>' +
+            s.time + '<em>' + (s.full ? 'complet' : (s.free > 1 ? s.free + ' places' : (isNext ? '1 place' : s.free + ' place'))) + '</em></button>';
+        }).join('') + '</div></div>';
+    };
+    area.innerHTML = build('Matin', morning) + build('Après-midi', afternoon);
+    area.querySelectorAll('.slot-btn').forEach(b=> b.addEventListener('click', ()=>{
+      state.time = b.dataset.time;
+      area.querySelectorAll('.slot-btn').forEach(x=> x.classList.toggle('sel', x === b));
+      $('toStep3').disabled = false;
+      paintSummary();
+    }));
+  }
+
+  $('toStep3').addEventListener('click', ()=>{
+    if(!state.date || !state.time){ toast('Choisissez une date puis une heure.'); return; }
+    gotoStep(3);
+  });
+
+  /* ---------------- step 3 : confirm ---------------- */
+  function toast(msg){
+    let t = document.getElementById('bkToast');
+    if(!t){
+      t = document.createElement('div');
+      t.id = 'bkToast';
+      t.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#241129;color:#fff;padding:13px 22px;border-radius:999px;font-size:.86rem;font-weight:700;z-index:600;opacity:0;transition:.4s cubic-bezier(.22,1,.36,1);box-shadow:0 20px 40px -18px rgba(0,0,0,.7);';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    requestAnimationFrame(()=>{ t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; });
+    clearTimeout(t._h);
+    t._h = setTimeout(()=>{ t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(20px)'; }, 3200);
+  }
+
+  $('bkSubmit').addEventListener('click', ()=>{
+    const err = $('bkErr');
+    err.classList.remove('show');
+    const name = $('bkName').value.trim();
+    const phone = $('bkPhone').value.trim();
+    const email = $('bkEmail').value.trim();
+    const note = $('bkNote').value.trim();
+    const reminder = (document.querySelector('input[name="reminder"]:checked') || {}).value || 'tel';
+    const digits = phone.replace(/\D/g,'').replace(/^213/,'0');
+
+    if(name.length < 3){ err.textContent = 'Indiquez votre nom complet.'; err.classList.add('show'); $('bkName').focus(); return; }
+    if(!/^0\d{8,9}$/.test(digits)){ err.textContent = 'Numéro de téléphone invalide (format 05XX XX XX XX).'; err.classList.add('show'); $('bkPhone').focus(); return; }
+    if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){ err.textContent = 'Adresse e-mail invalide.'; err.classList.add('show'); $('bkEmail').focus(); return; }
+
+    /* re-check availability before saving */
+    const still = lilasSlotsFor(state.date).find(s=> s.time === state.time);
+    if(!still || still.full){
+      err.textContent = 'Ce créneau vient d\'être pris. Revenez à l\'étape 2 pour en choisir un autre.';
+      err.classList.add('show');
+      state.time = ''; renderSlots(); paintSummary();
+      return;
+    }
+
+    const btn = $('bkSubmit');
+    btn.disabled = true;
+    btn.textContent = 'Enregistrement…';
+
+    setTimeout(()=>{
+      const appt = lilasAddAppointment({
+        date: state.date, time: state.time, name: name, phone: phone, email: email,
+        service: state.service, team: state.team, note: note, reminder: reminder,
+        status: 'nouveau', source: 'site'
+      });
+      lilasAddMessage({
+        name: name, phone: phone, service: state.service,
+        message: 'Réservation en ligne ' + appt.ref + ' — ' + lilasDateLabel(state.date) + ' à ' + state.time + '.' + (note ? ' Motif : ' + note : ''),
+        source: 'form'
+      });
+      if(typeof lilasAddActivity === 'function') lilasAddActivity('Nouveau rendez-vous ' + appt.ref + ' (' + state.service + ', ' + state.date + ' ' + state.time + ')', 'rdv');
+      showTicket(appt);
+    }, 700);
+  });
+
+  /* ---------------- confirmation ticket ---------------- */
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function icsFor(a){
+    const d = lilasParseYmd(a.date);
+    const [hh, mm] = a.time.split(':').map(Number);
+    const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), hh, mm);
+    const end = new Date(start.getTime() + (settings.booking.slotMinutes || 30) * 60000);
+    const fmt = x => x.getFullYear() + pad(x.getMonth()+1) + pad(x.getDate()) + 'T' + pad(x.getHours()) + pad(x.getMinutes()) + '00';
+    return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Clinique Les Lilas//FR','BEGIN:VEVENT',
+      'UID:' + a.ref + '@leslilas','DTSTAMP:' + fmt(new Date()),
+      'DTSTART:' + fmt(start),'DTEND:' + fmt(end),
+      'SUMMARY:Clinique Les Lilas — ' + a.service,
+      'LOCATION:' + (lilasGetContact().address || 'Clinique Les Lilas'),
+      'DESCRIPTION:Rendez-vous ' + a.ref + '. Apportez vos ordonnances et anciens résultats. Présentez-vous 10 minutes avant l\'heure.',
+      'BEGIN:VALARM','TRIGGER:-PT2H','ACTION:DISPLAY','DESCRIPTION:Rendez-vous clinique Les Lilas','END:VALARM',
+      'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  }
+
+  function showTicket(a){
+    $('wizard').style.display = 'none';
+    const area = $('ticketArea');
+    area.style.display = '';
+    const status = LILAS_STATUS[a.status] || LILAS_STATUS.nouveau;
+    const teamLine = a.team || 'Premier praticien disponible';
+    area.innerHTML =
+      '<div class="ticket">' +
+        '<div class="ticket-top">' +
+          '<span class="ticket-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" style="width:13px;height:13px;"><path d="M20 6 9 17l-5-5"/></svg> Demande enregistrée</span>' +
+          '<h3>Merci ' + esc(a.name.split(' ')[0]) + ', votre créneau est réservé.</h3>' +
+          '<p>Conservez ce code : il vous permet de suivre votre rendez-vous en ligne ou de le modifier par téléphone au ' + esc(((lilasGetContact().phones||[])[0]||{}).number || '') + '.</p>' +
+          '<div class="ticket-ref"><small>Code de rendez-vous</small><b>' + esc(a.ref) + '</b></div>' +
+        '</div>' +
+        '<div class="ticket-tear"><div class="ticket-line"></div></div>' +
+        '<div class="ticket-body">' +
+          '<div class="tk-grid">' +
+            '<div class="tk-item"><small>Date</small><b style="text-transform:capitalize;">' + esc(lilasFormatDateFr(a.date)) + '</b></div>' +
+            '<div class="tk-item"><small>Heure</small><b>' + esc(a.time) + ' · ' + (settings.booking.slotMinutes || 30) + ' min</b></div>' +
+            '<div class="tk-item"><small>Spécialité</small><b>' + esc(a.service) + '</b></div>' +
+            '<div class="tk-item"><small>Praticien</small><b>' + esc(teamLine) + '</b></div>' +
+            '<div class="tk-item full"><small>Statut</small><b><span class="badge-status ' + status.tone + '"><i></i>' + status.label + '</span></b></div>' +
+          '</div>' +
+          '<div class="ticket-actions">' +
+            '<button class="btn btn-primary" type="button" id="icsBtn">Ajouter à mon agenda (.ics)</button>' +
+            '<button class="btn btn-ghost" type="button" onclick="window.print()">Imprimer</button>' +
+            '<a class="btn btn-ghost" href="#suivi" id="trackBtn">Suivre ce rendez-vous</a>' +
+          '</div>' +
+          '<div class="ticket-barcode" id="barcode"></div>' +
+          '<p class="ticket-note">L\'accueil vous confirme ce rendez-vous sous 24h. En cas d\'empêchement, annulez-le depuis la page de suivi ou par téléphone.</p>' +
+        '</div>' +
+      '</div>';
+
+    /* decorative barcode from the reference */
+    const bc = $('barcode');
+    for(let i=0;i<64;i++){
+      const bar = document.createElement('i');
+      bar.style.flex = (a.ref.charCodeAt(i % a.ref.length) % 3) + 1;
+      bar.style.opacity = ((i * 7) % 5 > 1) ? '1' : '.15';
+      bc.appendChild(bar);
+    }
+    $('icsBtn').addEventListener('click', ()=>{
+      const blob = new Blob([icsFor(a)], { type:'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url; link.download = 'rdv-' + a.ref + '.ics';
+      document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 1500);
+    });
+    $('trackBtn').addEventListener('click', ()=>{
+      $('lookupInput').value = a.ref;
+      setTimeout(()=> document.getElementById('lookupForm').requestSubmit(), 400);
+    });
+    window.scrollTo({ top: area.getBoundingClientRect().top + window.scrollY - 110, behavior:'smooth' });
+  }
+
+  /* ---------------- suivi / lookup ---------------- */
+  $('lookupForm').addEventListener('submit', e=>{
+    e.preventDefault();
+    const out = $('lookupOut');
+    const ref = $('lookupInput').value.trim();
+    if(!ref){ out.innerHTML = ''; return; }
+    const a = lilasFindAppointment(ref);
+    if(!a){
+      out.innerHTML = '<div class="lu-card urgent-look" style="animation:panelIn .45s cubic-bezier(.22,1,.36,1);">' +
+        '<div class="lu-top"><b>Code introuvable</b></div>' +
+        '<div style="padding:16px 18px;font-size:.9rem;color:var(--ink-soft);line-height:1.6;">Aucun rendez-vous ne correspond à ce code. Vérifiez le format (LL-XXXXX) ou appelez l\'accueil au ' +
+        esc(((lilasGetContact().phones||[])[0]||{}).number || '') + '.</div></div>';
+      return;
+    }
+    const status = LILAS_STATUS[a.status] || LILAS_STATUS.nouveau;
+    const canCancel = (a.status === 'nouveau' || a.status === 'confirme');
+    out.innerHTML =
+      '<div class="lu-card' + (a.status === 'annule' ? ' urgent-look' : '') + '">' +
+        '<div class="lu-top"><b>' + esc(a.ref) + '</b><span class="badge-status ' + status.tone + '"><i></i>' + status.label + '</span></div>' +
+        '<div class="lu-body">' +
+          '<div class="tk-item"><small>Date</small><b style="text-transform:capitalize;">' + esc(lilasFormatDateFr(a.date)) + '</b></div>' +
+          '<div class="tk-item"><small>Heure</small><b>' + esc(a.time) + '</b></div>' +
+          '<div class="tk-item"><small>Spécialité</small><b>' + esc(a.service) + '</b></div>' +
+          '<div class="tk-item"><small>Praticien</small><b>' + esc(a.team || 'Premier disponible') + '</b></div>' +
+          '<div class="tk-item full"><small>Patient</small><b>' + esc(a.name) + ' · ' + esc(a.phone) + '</b></div>' +
+        '</div>' +
+        '<div class="lu-actions">' +
+          (a.status !== 'termine' && a.status !== 'annule' ? '<button class="btn btn-ghost" type="button" id="luIcs">Ajouter à mon agenda</button>' : '') +
+          (canCancel ? '<button class="btn btn-ghost" type="button" id="luCancel" style="color:#B23A5A;">Annuler ce rendez-vous</button>' : '') +
+        '</div>' +
+      '</div>';
+    const ics = document.getElementById('luIcs');
+    if(ics) ics.addEventListener('click', ()=>{
+      const blob = new Blob([icsFor(a)], { type:'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url; link.download = 'rdv-' + a.ref + '.ics';
+      document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 1500);
+    });
+    const cancel = document.getElementById('luCancel');
+    if(cancel) cancel.addEventListener('click', ()=>{
+      if(!confirm('Annuler le rendez-vous ' + a.ref + ' ?')) return;
+      lilasUpdateAppointment(a.id, { status:'annule' });
+      if(typeof lilasAddActivity === 'function') lilasAddActivity('Rendez-vous ' + a.ref + ' annulé par le patient', 'rdv');
+      $('lookupForm').requestSubmit();
+    });
+  });
+
+  /* ---------------- deep links ---------------- */
+  (function(){
+    const params = new URLSearchParams(location.search);
+    const qService = params.get('service');
+    const qDate = params.get('date');
+    const qTime = params.get('time');
+    if(qService){
+      const btn = Array.from(document.querySelectorAll('#serviceGrid .pill-opt')).find(b=> b.dataset.service === qService);
+      if(btn) btn.click();
+    }
+    if(qDate && /^\d{4}-\d{2}-\d{2}$/.test(qDate) && lilasHoursFor(qDate)){
+      state.date = qDate;
+      state.calMonth = qDate.slice(0,7);
+      if(qTime && /^\d{2}:\d{2}$/.test(qTime) && lilasSlotsFor(qDate).some(s=> s.time === qTime && !s.past && !s.full)){
+        state.time = qTime;
+        $('toStep3').disabled = false;
+      }
+      renderCalendar();
+      renderSlots();
+      paintSummary();
+      if(state.service) gotoStep(2);
+    }
+    /* handoff from the assistant */
+    try{
+      const h = JSON.parse(sessionStorage.getItem('lilas_handoff') || 'null');
+      if(h){
+        if(h.service){
+          const btn = Array.from(document.querySelectorAll('#serviceGrid .pill-opt')).find(b=> b.dataset.service === h.service);
+          if(btn) btn.click();
+        }
+        if(h.text) $('bkNote').value = h.text;
+        sessionStorage.removeItem('lilas_handoff');
+      }
+    }catch(e){}
+  })();
+
+  paintSummary();
+})();
+</script>
+</body>
+</html>

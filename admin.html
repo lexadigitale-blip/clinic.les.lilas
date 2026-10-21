@@ -1,0 +1,1923 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clinique Les Lilas — Administration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,560;0,9..144,650&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="./assets/lilas-data.js"></script>
+<style>
+  :root{
+    --purple-950:#1A0F1F; --purple-900:#241129; --purple-800:#3E1739;
+    --purple-600:#8B2C6B; --purple-500:#A73B82; --purple-400:#C45C9B;
+    --pink-300:#F3B8D4; --pink-200:#F7CFE1; --pink-100:#FBEAF3; --pink-50:#FEF6FA;
+    --white:#FFFFFF; --ink:#2A1830; --ink-soft:#6b5468;
+    --line:#EADCE6; --panel:#FFFFFF;
+    --grad:linear-gradient(135deg,#8B2C6B 0%,#A73B82 48%,#D96BA6 100%);
+    --glow:0 18px 40px -20px rgba(139,44,107,.6);
+    --lift:0 22px 46px -28px rgba(62,23,57,.55);
+    --ok:#2FBF87; --warn:#E8973A; --bad:#D9536F; --info:#5B8DEF;
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Manrope',sans-serif;background:#F6EEF4;color:var(--ink);min-height:100vh;}
+  h1,h2,h3,.display{font-family:'Fraunces',serif;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  input,select,textarea{font-family:inherit;}
+  ::selection{background:var(--purple-600);color:#fff;}
+  a{color:inherit;text-decoration:none;}
+  ::-webkit-scrollbar{width:10px;height:10px;}
+  ::-webkit-scrollbar-track{background:#F1E4EE;}
+  ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#A73B82,#8B2C6B);border-radius:99px;border:2px solid #F1E4EE;}
+  a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--pink-300);outline-offset:2px;border-radius:8px;}
+
+  /* ================= LOGIN GATE ================= */
+  #gate{position:fixed;inset:0;z-index:999;display:grid;grid-template-columns:1.05fr .95fr;}
+  .gate-visual{
+    position:relative;overflow:hidden;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;padding:56px;
+    background:linear-gradient(180deg,rgba(26,15,31,.35),rgba(26,15,31,.92)),url('assets/clinique-building.png') center/cover no-repeat,var(--purple-950);
+  }
+  .gate-visual::after{content:"";position:absolute;inset:-20%;background:radial-gradient(45% 45% at 80% 15%,rgba(217,107,166,.5),transparent 65%),radial-gradient(45% 45% at 10% 90%,rgba(139,44,107,.6),transparent 70%);mix-blend-mode:screen;animation:aurora 20s ease-in-out infinite alternate;}
+  @keyframes aurora{100%{transform:translate3d(-4%,3%,0) scale(1.12);}}
+  .gate-visual > *{position:relative;z-index:1;}
+  .gate-visual h2{font-size:clamp(1.8rem,2.6vw,2.6rem);font-weight:650;line-height:1.12;max-width:460px;margin-top:18px;}
+  .gate-visual p{margin-top:14px;color:rgba(255,255,255,.75);max-width:440px;line-height:1.7;font-size:.95rem;}
+  .gate-stats{display:flex;gap:26px;margin-top:26px;flex-wrap:wrap;}
+  .gate-stats div b{display:block;font-family:'Fraunces',serif;font-size:1.5rem;}
+  .gate-stats div span{font-size:.72rem;color:rgba(255,255,255,.6);letter-spacing:.06em;text-transform:uppercase;}
+  .gate-form{display:flex;align-items:center;justify-content:center;padding:40px;background:linear-gradient(180deg,#FBEAF3,#FEF6FA);}
+  .gate-card{width:100%;max-width:390px;}
+  .gate-card .clover{width:38px;height:38px;margin-bottom:18px;}
+  .gate-card h1{font-size:1.7rem;font-weight:650;}
+  .gate-card > p{font-size:.9rem;color:var(--ink-soft);margin-top:8px;line-height:1.6;}
+  .gate-field{margin-top:22px;}
+  .gate-field label{display:block;font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px;}
+  .gate-field input{width:100%;padding:15px 16px;border-radius:14px;background:#fff;border:1.5px solid var(--line);font-size:.96rem;transition:.3s;}
+  .gate-field input:focus{outline:none;border-color:var(--purple-500);box-shadow:0 0 0 4px rgba(167,59,130,.14);}
+  .gate-btn{width:100%;margin-top:16px;padding:15px;border-radius:999px;font-weight:800;font-size:.94rem;background:var(--grad);color:#fff;box-shadow:var(--glow);transition:transform .35s var(--ease),box-shadow .35s var(--ease);position:relative;overflow:hidden;}
+  .gate-btn:hover{transform:translateY(-2px);box-shadow:0 24px 46px -20px rgba(139,44,107,.75);}
+  .gate-err{font-size:.84rem;color:#B23A5A;margin-top:12px;min-height:1.2em;font-weight:700;}
+  .gate-note{font-size:.74rem;color:var(--ink-soft);margin-top:22px;line-height:1.6;padding-top:16px;border-top:1px dashed var(--line);}
+  @media(max-width:900px){#gate{grid-template-columns:1fr;}.gate-visual{display:none;}}
+
+  /* ================= SHELL ================= */
+  #app{display:none;}
+  #app.show{display:block;}
+  .shell{display:flex;min-height:100vh;}
+
+  .side{
+    width:252px;flex-shrink:0;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;
+    background:linear-gradient(180deg,#1A0F1F 0%,#2B1330 60%,#3E1739 100%);color:#fff;padding:22px 16px;overflow-y:auto;
+  }
+  .side::-webkit-scrollbar{width:6px;}
+  .side::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border:0;}
+  .side-brand{display:flex;align-items:center;gap:11px;padding:6px 8px 20px;}
+  .side-brand svg{width:32px;height:32px;flex-shrink:0;}
+  .side-brand b{font-family:'Fraunces',serif;font-size:1.02rem;font-weight:650;display:block;line-height:1.1;}
+  .side-brand span{font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--pink-200);}
+  .side-label{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.35);padding:16px 12px 8px;}
+  .side-nav{display:flex;flex-direction:column;gap:3px;}
+  .side-link{
+    display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:14px;font-size:.88rem;font-weight:700;
+    color:rgba(255,255,255,.68);transition:.3s var(--ease);text-align:left;width:100%;position:relative;
+  }
+  .side-link svg{width:17px;height:17px;flex-shrink:0;opacity:.85;}
+  .side-link:hover{background:rgba(255,255,255,.07);color:#fff;}
+  .side-link.active{background:var(--grad);color:#fff;box-shadow:0 14px 28px -14px rgba(217,107,166,.9);}
+  .side-link .sb{
+    margin-left:auto;min-width:21px;height:21px;padding:0 6px;border-radius:999px;background:rgba(255,255,255,.14);
+    font-size:.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;
+  }
+  .side-link.active .sb{background:rgba(255,255,255,.25);}
+  .side-link .sb.alert{background:var(--bad);color:#fff;}
+  .side-foot{margin-top:auto;padding-top:18px;border-top:1px solid rgba(255,255,255,.1);display:grid;gap:8px;}
+  .side-foot a,.side-foot button{display:flex;align-items:center;gap:9px;font-size:.8rem;font-weight:700;color:rgba(255,255,255,.6);padding:9px 12px;border-radius:12px;transition:.3s;text-align:left;width:100%;}
+  .side-foot a:hover,.side-foot button:hover{background:rgba(255,255,255,.08);color:#fff;}
+  .side-foot svg{width:15px;height:15px;}
+  .side-ver{font-size:.66rem;color:rgba(255,255,255,.3);padding:6px 12px 0;}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .topbar{
+    position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+    padding:18px 30px;background:rgba(246,238,244,.82);backdrop-filter:blur(16px) saturate(150%);border-bottom:1px solid rgba(139,44,107,.1);
+  }
+  .topbar h1{font-size:1.35rem;font-weight:650;}
+  .topbar p{font-size:.8rem;color:var(--ink-soft);margin-top:2px;}
+  .top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .clock{display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:700;color:var(--ink-soft);background:#fff;border:1px solid var(--line);padding:9px 14px;border-radius:999px;}
+  .clock svg{width:14px;height:14px;color:var(--purple-500);}
+  .menu-btn{display:none;}
+
+  main.content{padding:26px 30px 90px;max-width:1320px;width:100%;margin:0 auto;}
+  .panel{display:none;animation:panelIn .45s var(--ease);}
+  .panel.active{display:block;}
+  @keyframes panelIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+  .panel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap;}
+  .panel-head h2{font-size:1.45rem;font-weight:650;}
+  .panel-head p{font-size:.85rem;color:var(--ink-soft);margin-top:4px;max-width:62ch;}
+  .panel-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:999px;font-weight:800;font-size:.84rem;transition:transform .3s var(--ease),box-shadow .3s var(--ease),background .3s ease,color .3s ease;position:relative;overflow:hidden;}
+  .btn svg{width:14px;height:14px;}
+  .btn-primary{background:var(--grad);color:#fff;box-shadow:0 12px 26px -12px rgba(139,44,107,.65);}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 18px 34px -14px rgba(139,44,107,.8);}
+  .btn-primary:disabled{opacity:.55;cursor:not-allowed;transform:none;}
+  .btn-ghost{border:1.5px solid var(--line);color:var(--purple-600);background:#fff;}
+  .btn-ghost:hover{background:var(--pink-100);border-color:rgba(139,44,107,.3);}
+  .btn-soft{background:var(--pink-100);color:var(--purple-600);}
+  .btn-soft:hover{background:var(--pink-200);}
+  .btn-danger{color:#B23A5A;border:1.5px solid rgba(178,58,90,.3);background:#fff;}
+  .btn-danger:hover{background:#FCE4EA;}
+  .btn-sm{padding:8px 14px;font-size:.78rem;}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:0 20px 44px -36px rgba(62,23,57,.7);}
+  .card-pad{padding:24px;}
+  .card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 24px 0;flex-wrap:wrap;}
+  .card-head h3{font-size:1.08rem;font-weight:650;}
+  .card-head small{font-size:.76rem;color:var(--ink-soft);}
+  .card-body{padding:18px 24px 24px;}
+
+  /* ---------- KPI ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;}
+  .kpi{position:relative;overflow:hidden;background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 20px 44px -38px rgba(62,23,57,.8);}
+  .kpi::after{content:"";position:absolute;right:-34px;top:-34px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(167,59,130,.14),transparent 70%);}
+  .kpi-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .kpi-ico{width:40px;height:40px;border-radius:13px;background:var(--pink-100);color:var(--purple-600);display:flex;align-items:center;justify-content:center;}
+  .kpi-ico svg{width:19px;height:19px;}
+  .kpi-delta{font-size:.7rem;font-weight:800;padding:4px 9px;border-radius:999px;background:#DFF6ED;color:#12664A;}
+  .kpi-delta.warn{background:#FFF2DC;color:#8A5A12;}
+  .kpi-delta.bad{background:#FCE4EA;color:#8B2C42;}
+  .kpi b{display:block;font-family:'Fraunces',serif;font-size:2.05rem;font-weight:650;line-height:1;margin-top:16px;color:var(--purple-600);}
+  .kpi small{display:block;font-size:.78rem;color:var(--ink-soft);margin-top:6px;font-weight:600;}
+  .kpi .spark{margin-top:12px;height:26px;display:flex;align-items:flex-end;gap:3px;}
+  .kpi .spark i{flex:1;background:linear-gradient(180deg,var(--pink-300),var(--purple-500));border-radius:2px;min-height:3px;opacity:.85;}
+
+  .dash-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:16px;}
+  .dash-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+  /* ---------- charts ---------- */
+  .chart{width:100%;height:auto;display:block;}
+  .chart-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:.74rem;color:var(--ink-soft);font-weight:700;}
+  .chart-legend span{display:inline-flex;align-items:center;gap:7px;}
+  .chart-legend i{width:9px;height:9px;border-radius:3px;}
+  .donut-wrap{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+  .donut-center{font-family:'Fraunces',serif;font-size:1.6rem;font-weight:650;fill:var(--ink);}
+  .donut-sub{font-size:.68rem;fill:var(--ink-soft);font-family:'Manrope',sans-serif;}
+  .donut-list{display:grid;gap:9px;flex:1;min-width:150px;}
+  .donut-row{display:flex;align-items:center;gap:9px;font-size:.82rem;font-weight:700;}
+  .donut-row i{width:9px;height:9px;border-radius:50%;}
+  .donut-row span{color:var(--ink-soft);font-weight:600;}
+  .donut-row b{margin-left:auto;}
+
+  .hbars{display:grid;gap:12px;}
+  .hbar-row{display:grid;grid-template-columns:190px 1fr 44px;gap:12px;align-items:center;font-size:.82rem;}
+  .hbar-row .hb-name{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .hbar-track{height:11px;border-radius:99px;background:var(--pink-100);overflow:hidden;}
+  .hbar-fill{height:100%;border-radius:99px;background:var(--grad);transition:width 1s var(--ease);}
+  .hbar-row .hb-val{text-align:right;font-weight:800;color:var(--purple-600);}
+
+  /* ---------- activity journal ---------- */
+  .journal{display:grid;gap:2px;}
+  .journal-item{display:flex;gap:13px;padding:11px 4px;border-bottom:1px dashed var(--line);align-items:flex-start;}
+  .journal-item:last-child{border-bottom:0;}
+  .journal-dot{width:30px;height:30px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--pink-100);color:var(--purple-600);}
+  .journal-dot svg{width:14px;height:14px;}
+  .journal-item p{font-size:.85rem;line-height:1.45;}
+  .journal-item small{font-size:.72rem;color:var(--ink-soft);}
+
+  /* ---------- toolbar / filters ---------- */
+  .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+  .search{display:flex;align-items:center;gap:9px;padding:11px 16px;border-radius:999px;background:#fff;border:1.5px solid var(--line);min-width:230px;flex:1;max-width:340px;}
+  .search svg{width:15px;height:15px;color:var(--purple-500);}
+  .search input{flex:1;border:0;background:none;font:inherit;font-size:.88rem;}
+  .search input:focus{outline:none;}
+  .search:focus-within{border-color:var(--purple-500);box-shadow:0 0 0 4px rgba(167,59,130,.12);}
+  .filters select,.filters input[type="date"]{padding:11px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:.84rem;font-weight:700;color:var(--ink);}
+  .filters select:focus,.filters input:focus{outline:none;border-color:var(--purple-500);}
+  .view-toggle{display:flex;background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:3px;margin-left:auto;}
+  .view-toggle button{padding:8px 16px;border-radius:999px;font-size:.78rem;font-weight:800;color:var(--ink-soft);transition:.3s;}
+  .view-toggle button.on{background:var(--grad);color:#fff;}
+
+  /* ---------- appointment table ---------- */
+  .table-wrap{overflow-x:auto;}
+  table.tbl{width:100%;border-collapse:collapse;font-size:.86rem;}
+  table.tbl th{text-align:left;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  table.tbl td{padding:13px 14px;border-bottom:1px solid #F4E9F1;vertical-align:middle;}
+  table.tbl tr:last-child td{border-bottom:0;}
+  table.tbl tbody tr{transition:background .25s ease;}
+  table.tbl tbody tr:hover{background:var(--pink-50);}
+  table.tbl tr.today{background:#FFF9EC;}
+  .pt-name{font-weight:800;}
+  .pt-sub{font-size:.74rem;color:var(--ink-soft);}
+  .ref-code{font-family:'Fraunces',serif;font-weight:650;letter-spacing:.06em;color:var(--purple-600);}
+  .row-actions{display:flex;gap:6px;justify-content:flex-end;}
+  .icon-btn{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#fff;transition:.25s;}
+  .icon-btn:hover{background:var(--pink-100);border-color:var(--purple-500);}
+  .icon-btn.ok:hover{background:#DFF6ED;border-color:var(--ok);}
+  .icon-btn.warn:hover{background:#FFF2DC;border-color:var(--warn);}
+  .icon-btn.bad:hover{background:#FCE4EA;border-color:var(--bad);}
+  .icon-btn svg{width:14px;height:14px;}
+  .status-select{padding:7px 10px;border-radius:10px;border:1.5px solid var(--line);font-size:.76rem;font-weight:800;background:#fff;}
+  .badge-status{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;font-size:.7rem;font-weight:800;white-space:nowrap;}
+  .badge-status i{width:7px;height:7px;border-radius:50%;}
+  .badge-status.new{background:#FFF2DC;color:#8A5A12;} .badge-status.new i{background:var(--warn);}
+  .badge-status.ok{background:#DFF6ED;color:#12664A;} .badge-status.ok i{background:var(--ok);}
+  .badge-status.done{background:#EDE7F6;color:#4A3072;} .badge-status.done i{background:#7E57C2;}
+  .badge-status.cancel{background:#FCE4EA;color:#8B2C42;} .badge-status.cancel i{background:var(--bad);}
+  .demo-tag{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);background:var(--pink-50);border:1px dashed var(--line);padding:2px 7px;border-radius:999px;}
+
+  /* ---------- agenda calendar ---------- */
+  .agenda{display:none;}
+  .agenda.on{display:block;}
+  .list.off{display:none;}
+  .ag-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap;}
+  .ag-title{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:650;text-transform:capitalize;}
+  .ag-nav{display:flex;gap:8px;}
+  .ag-nav button{width:36px;height:36px;border-radius:11px;background:#fff;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--purple-600);}
+  .ag-nav button:hover{background:var(--pink-100);}
+  .ag-nav svg{width:15px;height:15px;}
+  .ag-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}
+  .ag-dow{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);text-align:center;padding-bottom:4px;}
+  .ag-day{
+    min-height:96px;border-radius:16px;background:#fff;border:1.5px solid var(--line);padding:9px;text-align:left;
+    display:flex;flex-direction:column;gap:6px;transition:.25s var(--ease);
+  }
+  .ag-day:hover{border-color:var(--purple-500);transform:translateY(-2px);box-shadow:0 14px 28px -22px rgba(62,23,57,.9);}
+  .ag-day.out{background:transparent;border-color:transparent;}
+  .ag-day.today{border-color:var(--purple-500);box-shadow:0 0 0 3px rgba(167,59,130,.14);}
+  .ag-day.sel{background:var(--grad);color:#fff;border-color:transparent;}
+  .ag-day .ad-num{font-weight:800;font-size:.9rem;}
+  .ag-day .ad-count{font-size:.68rem;font-weight:700;color:var(--ink-soft);}
+  .ag-day.sel .ad-count{color:rgba(255,255,255,.8);}
+  .ad-chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto;}
+  .ad-chip{font-size:.6rem;font-weight:800;padding:2px 5px;border-radius:6px;background:var(--pink-100);color:var(--purple-600);}
+  .ad-chip.ok{background:#DFF6ED;color:#12664A;}
+  .ad-chip.new{background:#FFF2DC;color:#8A5A12;}
+  .ad-chip.cancel{background:#FCE4EA;color:#8B2C42;text-decoration:line-through;}
+  .ag-day.sel .ad-chip{background:rgba(255,255,255,.2);color:#fff;}
+
+  /* ---------- hours editor ---------- */
+  .hours-grid{display:grid;gap:10px;}
+  .hours-row{display:grid;grid-template-columns:120px 74px 1fr 1fr 1fr;gap:10px;align-items:center;background:var(--pink-50);border:1px solid var(--line);border-radius:16px;padding:12px 14px;}
+  .hours-row .hr-day{font-weight:800;font-size:.88rem;text-transform:capitalize;}
+  .hours-row.closed{opacity:.62;}
+  .hours-row label{display:flex;align-items:center;gap:7px;font-size:.74rem;font-weight:800;color:var(--ink-soft);cursor:pointer;}
+  .hours-row input[type="time"]{width:100%;padding:9px 10px;border-radius:11px;border:1.5px solid var(--line);background:#fff;font-size:.84rem;font-weight:700;}
+  .hours-row input:focus{outline:none;border-color:var(--purple-500);}
+  .hours-row .brk-label{font-size:.66rem;display:block;color:var(--ink-soft);font-weight:800;margin-bottom:3px;}
+  .switch{position:relative;width:42px;height:24px;flex-shrink:0;}
+  .switch input{opacity:0;width:0;height:0;position:absolute;}
+  .switch i{position:absolute;inset:0;background:#DCCBDA;border-radius:99px;transition:.3s;cursor:pointer;}
+  .switch i::before{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.3s var(--ease);}
+  .switch input:checked + i{background:var(--grad);}
+  .switch input:checked + i::before{transform:translateX(18px);}
+  .switch input:focus-visible + i{box-shadow:0 0 0 4px rgba(167,59,130,.25);}
+
+  .param-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:.72rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:7px;}
+  .field input,.field textarea,.field select{width:100%;padding:12px 13px;border-radius:12px;border:1.5px solid var(--line);font-size:.9rem;color:var(--ink);background:#fff;transition:.25s;}
+  .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--purple-500);box-shadow:0 0 0 4px rgba(167,59,130,.12);}
+  .field textarea{resize:vertical;min-height:84px;}
+  .field .hint{font-size:.72rem;color:var(--ink-soft);margin-top:5px;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:var(--pink-100);color:var(--purple-600);font-size:.8rem;font-weight:800;}
+  .chip button{width:18px;height:18px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;}
+  .chip button svg{width:10px;height:10px;}
+
+  /* ---------- team ---------- */
+  .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+  .team-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;position:relative;transition:.35s var(--ease);}
+  .team-card:hover{transform:translateY(-4px);box-shadow:var(--lift);}
+  .team-card .tc-top{display:flex;gap:12px;align-items:center;}
+  .team-av{width:46px;height:46px;border-radius:15px;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;flex-shrink:0;box-shadow:0 12px 22px -12px rgba(139,44,107,.9);}
+  .team-card h3{font-family:'Manrope',sans-serif;font-size:.96rem;font-weight:800;}
+  .team-card .tc-role{font-size:.7rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--purple-600);margin-top:2px;}
+  .team-card .tc-bio{font-size:.8rem;color:var(--ink-soft);line-height:1.55;margin-top:12px;}
+  .team-card .tc-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);font-size:.72rem;color:var(--ink-soft);}
+  .team-card .row-actions{justify-content:flex-start;}
+
+  /* ---------- services ---------- */
+  .svc-row{display:grid;grid-template-columns:46px 1fr auto;gap:16px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px;margin-bottom:10px;transition:.3s var(--ease);}
+  .svc-row:hover{transform:translateY(-2px);border-color:var(--purple-500);box-shadow:0 18px 36px -30px rgba(62,23,57,.8);}
+  .svc-icon{width:46px;height:46px;border-radius:14px;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;}
+  .svc-icon svg{width:20px;height:20px;}
+  .svc-row h3{font-family:'Manrope',sans-serif;font-size:.96rem;font-weight:800;}
+  .svc-row .tag{font-size:.74rem;color:var(--purple-600);font-weight:800;margin-top:2px;}
+  .svc-row .desc{font-size:.8rem;color:var(--ink-soft);margin-top:4px;max-width:70ch;line-height:1.5;}
+
+  /* ---------- content editor ---------- */
+  .content-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
+  .stat-edit{display:grid;grid-template-columns:110px 1fr auto;gap:10px;align-items:end;margin-bottom:10px;}
+  .rev-edit{display:grid;grid-template-columns:150px 1fr 150px auto;gap:10px;align-items:end;margin-bottom:10px;}
+  .faq-edit{border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px;background:var(--pink-50);}
+  .faq-edit .field{margin-bottom:10px;}
+  .save-note{font-size:.82rem;color:var(--purple-600);font-weight:800;margin-top:12px;min-height:1.2em;}
+  .preview-box{background:var(--purple-950);color:#fff;border-radius:18px;padding:20px;position:relative;overflow:hidden;}
+  .preview-box .pv-eyebrow{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--pink-300);font-weight:800;}
+  .preview-box h4{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:650;margin-top:10px;line-height:1.15;}
+  .preview-box h4 em{color:var(--pink-300);}
+  .preview-box p{font-size:.84rem;color:rgba(255,255,255,.72);margin-top:10px;line-height:1.6;}
+
+  /* ---------- messages ---------- */
+  .msg-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;transition:.3s var(--ease);}
+  .msg-card:hover{box-shadow:0 18px 36px -32px rgba(62,23,57,.8);}
+  .msg-card.unread{box-shadow:inset 4px 0 0 var(--purple-600);}
+  .msg-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:6px;}
+  .msg-top b{font-size:.92rem;}
+  .msg-top .badge{font-size:.66rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--purple-600);background:var(--pink-100);padding:2px 9px;border-radius:999px;}
+  .msg-top .badge-ia{font-size:.66rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:var(--grad);padding:3px 10px;border-radius:999px;}
+  .msg-text{font-size:.86rem;line-height:1.55;}
+  .msg-text.ia-brief{background:var(--pink-50);border:1px dashed rgba(139,44,107,.25);border-radius:12px;padding:10px 12px;}
+  .msg-meta{font-size:.76rem;color:var(--ink-soft);margin-bottom:8px;}
+  .msg-date{font-size:.72rem;color:var(--ink-soft);white-space:nowrap;}
+
+  /* ---------- empty ---------- */
+  .empty{text-align:center;padding:56px 20px;color:var(--ink-soft);border:1.5px dashed var(--line);border-radius:18px;font-size:.9rem;line-height:1.6;}
+  .empty svg{width:32px;height:32px;margin:0 auto 12px;color:var(--purple-500);opacity:.6;}
+
+  /* ---------- modal ---------- */
+  .modal-overlay{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(26,15,31,.55);backdrop-filter:blur(5px);opacity:0;visibility:hidden;transition:.3s ease;}
+  .modal-overlay.open{opacity:1;visibility:visible;}
+  .modal-card{width:100%;max-width:560px;max-height:88vh;overflow-y:auto;background:#fff;border-radius:24px;padding:28px;transform:translateY(18px) scale(.98);transition:transform .4s var(--ease);}
+  .modal-overlay.open .modal-card{transform:none;}
+  .modal-card h3{font-size:1.2rem;font-weight:650;margin-bottom:18px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px;flex-wrap:wrap;}
+  .modal-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+  /* ---------- toast ---------- */
+  #toastWrap{position:fixed;right:22px;bottom:22px;z-index:500;display:flex;flex-direction:column;gap:10px;align-items:flex-end;}
+  .toast{display:flex;align-items:center;gap:10px;background:var(--purple-950);color:#fff;padding:13px 18px;border-radius:16px;font-size:.85rem;font-weight:700;box-shadow:0 24px 48px -22px rgba(0,0,0,.8);transform:translateY(16px);opacity:0;transition:.4s var(--ease);max-width:360px;}
+  .toast.in{transform:none;opacity:1;}
+  .toast svg{width:15px;height:15px;flex-shrink:0;color:var(--pink-300);}
+
+  /* ---------- responsive ---------- */
+  @media(max-width:1150px){.kpis{grid-template-columns:repeat(2,1fr);}.dash-grid,.dash-grid-2,.content-grid{grid-template-columns:1fr;}}
+  @media(max-width:980px){
+    .side{position:fixed;left:0;top:0;z-index:120;transform:translateX(-100%);transition:transform .45s var(--ease);}
+    .side.open{transform:none;box-shadow:0 0 60px rgba(0,0,0,.5);}
+    .menu-btn{display:flex;width:40px;height:40px;border-radius:12px;background:#fff;border:1.5px solid var(--line);align-items:center;justify-content:center;}
+    .menu-btn svg{width:18px;height:18px;}
+    main.content{padding:20px 18px 80px;}
+    .hours-row{grid-template-columns:1fr 1fr;}
+    .rev-edit{grid-template-columns:1fr;}
+  }
+  @media(max-width:640px){
+    .kpis{grid-template-columns:1fr;}
+    .modal-2col,.stat-edit{grid-template-columns:1fr;}
+    .msg-card{grid-template-columns:1fr;}
+    .topbar{padding:14px 18px;}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important;}}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN GATE ================= -->
+<div id="gate">
+  <div class="gate-visual">
+    <svg class="clover" viewBox="0 0 60 60" fill="none" style="width:44px;height:44px;">
+      <circle cx="21" cy="21" r="14" fill="#F3B8D4"/><circle cx="39" cy="21" r="14" fill="#8B2C6B"/>
+      <circle cx="21" cy="39" r="14" fill="#8B2C6B"/><circle cx="39" cy="39" r="14" fill="#F3B8D4"/>
+    </svg>
+    <h2>Clinique Les Lilas<br>— le poste de contrôle.</h2>
+    <p>Rendez-vous, agenda, équipe, coordonnées et demandes : tout ce qui alimente le site public se pilote depuis cet écran, sans ligne de code.</p>
+    <div class="gate-stats">
+      <div><b id="gK1">—</b><span>Rendez-vous</span></div>
+      <div><b id="gK2">—</b><span>Spécialités</span></div>
+      <div><b id="gK3">—</b><span>Praticiens</span></div>
+    </div>
+  </div>
+  <div class="gate-form">
+    <div class="gate-card">
+      <svg class="clover" viewBox="0 0 60 60" fill="none">
+        <circle cx="21" cy="21" r="14" fill="#F3B8D4"/><circle cx="39" cy="21" r="14" fill="#8B2C6B"/>
+        <circle cx="21" cy="39" r="14" fill="#8B2C6B"/><circle cx="39" cy="39" r="14" fill="#F3B8D4"/>
+      </svg>
+      <h1>Administration</h1>
+      <p>Espace réservé à l'équipe de la clinique. Saisissez le mot de passe pour gérer le site public.</p>
+      <div class="gate-field">
+        <label for="gatePwd">Mot de passe</label>
+        <input id="gatePwd" type="password" placeholder="••••••••" autocomplete="off">
+      </div>
+      <button class="gate-btn" id="gateBtn" type="button">Se connecter</button>
+      <div class="gate-err" id="gateErr"></div>
+      <p class="gate-note">Mot de passe par défaut : <b>lilas2026</b> — pensez à le changer dans le fichier admin.html avant publication. La protection est locale (site statique, sans serveur) : elle évite les erreurs accidentelles mais ne remplace pas une authentification serveur pour un usage public sensible.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app">
+  <div class="shell">
+
+    <!-- ---------- SIDEBAR ---------- -->
+    <aside class="side" id="side">
+      <div class="side-brand">
+        <svg viewBox="0 0 60 60" fill="none">
+          <circle cx="21" cy="21" r="14" fill="#F3B8D4"/><circle cx="39" cy="21" r="14" fill="#8B2C6B"/>
+          <circle cx="21" cy="39" r="14" fill="#8B2C6B"/><circle cx="39" cy="39" r="14" fill="#F3B8D4"/>
+        </svg>
+        <div><b>Les Lilas</b><span>Administration</span></div>
+      </div>
+
+      <div class="side-label">Pilotage</div>
+      <nav class="side-nav">
+        <button class="side-link active" data-tab="dashboard" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z"/></svg>
+          Tableau de bord
+        </button>
+        <button class="side-link" data-tab="appointments" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 11h18"/></svg>
+          Rendez-vous
+          <span class="sb alert" id="sbAppts">0</span>
+        </button>
+        <button class="side-link" data-tab="hours" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          Agenda &amp; horaires
+        </button>
+      </nav>
+
+      <div class="side-label">Contenu du site</div>
+      <nav class="side-nav">
+        <button class="side-link" data-tab="team" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/></svg>
+          Équipe médicale
+          <span class="sb" id="sbTeam">0</span>
+        </button>
+        <button class="side-link" data-tab="services" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 21c-4.4-2.9-8-6.9-8-11a8 8 0 0 1 16 0c0 4.1-3.6 8.1-8 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>
+          Spécialités
+          <span class="sb" id="sbSvc">0</span>
+        </button>
+        <button class="side-link" data-tab="content" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 5h16M4 12h10M4 19h7"/></svg>
+          Textes &amp; vitrine
+        </button>
+        <button class="side-link" data-tab="messages" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>
+          Messages
+          <span class="sb alert" id="sbMsgs">0</span>
+        </button>
+        <button class="side-link" data-tab="backup" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Sauvegarde
+        </button>
+      </nav>
+
+      <div class="side-foot">
+        <a href="index.html" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg>
+          Voir le site public
+        </a>
+        <button id="logoutBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+          Déconnexion
+        </button>
+        <div class="side-ver">Les Lilas · console v3 · données locales (navigateur)</div>
+      </div>
+    </aside>
+
+    <!-- ---------- MAIN ---------- -->
+    <div class="main">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <button class="menu-btn" id="menuBtn" type="button" aria-label="Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          </button>
+          <div>
+            <h1 id="pageTitle">Tableau de bord</h1>
+            <p id="pageSub">Vue d'ensemble de l'activité de la clinique</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <span class="clock">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            <span id="adminClock">—</span>
+          </span>
+          <a href="rendezvous.html" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            Page de réservation
+          </a>
+        </div>
+      </header>
+
+      <main class="content">
+
+        <!-- ================= DASHBOARD ================= -->
+        <section class="panel active" id="panel-dashboard">
+          <div class="kpis" id="kpiRow"></div>
+
+          <div class="dash-grid">
+            <div class="card">
+              <div class="card-head">
+                <div><h3>Rendez-vous sur 14 jours</h3><small>Confirmés, à confirmer et terminés, jour par jour</small></div>
+              </div>
+              <div class="card-body" id="chartDaily"></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><div><h3>Répartition par statut</h3><small>Tous les rendez-vous enregistrés</small></div></div>
+              <div class="card-body" id="chartStatus"></div>
+            </div>
+          </div>
+
+          <div class="dash-grid-2">
+            <div class="card">
+              <div class="card-head"><div><h3>Spécialités les plus demandées</h3><small>Volume de rendez-vous par spécialité</small></div></div>
+              <div class="card-body" id="chartServices"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">
+                <div><h3>Journal d'activité</h3><small>Les dernières actions effectuées dans la console</small></div>
+                <button class="btn btn-ghost btn-sm" id="clearJournal" type="button">Vider</button>
+              </div>
+              <div class="card-body" id="journalList"></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:16px;">
+            <div class="card-head">
+              <div><h3>Prochains rendez-vous</h3><small>Les rendez-vous à venir, du plus proche au plus lointain</small></div>
+              <button class="btn btn-ghost btn-sm" data-goto-tab="appointments" type="button">Tout voir</button>
+            </div>
+            <div class="card-body" id="upcomingList"></div>
+          </div>
+        </section>
+
+        <!-- ================= APPOINTMENTS ================= -->
+        <section class="panel" id="panel-appointments">
+          <div class="panel-head">
+            <div>
+              <h2>Rendez-vous</h2>
+              <p>Toutes les réservations reçues depuis le site ou saisies à l'accueil. Changez le statut, annulez, exportez en CSV.</p>
+            </div>
+            <div class="panel-tools">
+              <button class="btn btn-ghost" id="exportAppts" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                Exporter CSV
+              </button>
+              <button class="btn btn-primary" id="newApptBtn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+                Nouveau rendez-vous
+              </button>
+            </div>
+          </div>
+
+          <div class="filters">
+            <div class="search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input id="fSearch" type="search" placeholder="Nom, téléphone, code LL-…, spécialité">
+            </div>
+            <select id="fStatus">
+              <option value="all">Tous les statuts</option>
+              <option value="nouveau">À confirmer</option>
+              <option value="confirme">Confirmé</option>
+              <option value="termine">Terminé</option>
+              <option value="annule">Annulé</option>
+            </select>
+            <select id="fService"><option value="all">Toutes les spécialités</option></select>
+            <select id="fDay">
+              <option value="all">Toutes les dates</option>
+              <option value="today">Aujourd'hui</option>
+              <option value="week">7 prochains jours</option>
+              <option value="past">Dates passées</option>
+            </select>
+            <div class="view-toggle">
+              <button class="on" id="viewList" type="button">Liste</button>
+              <button id="viewAgenda" type="button">Agenda</button>
+            </div>
+          </div>
+
+          <div class="card list" id="apptListCard">
+            <div class="card-body table-wrap" id="apptList"></div>
+          </div>
+
+          <div class="agenda" id="agendaView">
+            <div class="card card-pad">
+              <div class="ag-head">
+                <div class="ag-title" id="agTitle">—</div>
+                <div class="ag-nav">
+                  <button id="agPrev" type="button" aria-label="Mois précédent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></button>
+                  <button id="agNext" type="button" aria-label="Mois suivant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></button>
+                </div>
+              </div>
+              <div class="ag-grid" id="agGrid"></div>
+              <p style="font-size:.76rem;color:var(--ink-soft);margin-top:14px;">Cliquez sur un jour pour filtrer la liste des rendez-vous ci-dessous.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= HOURS ================= -->
+        <section class="panel" id="panel-hours">
+          <div class="panel-head">
+            <div>
+              <h2>Agenda &amp; horaires</h2>
+              <p>Ces règles pilotent le calendrier public : jours d'ouverture, durée des créneaux, places par heure et jours de fermeture exceptionnelle.</p>
+            </div>
+            <button class="btn btn-primary" id="saveHours" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+              Enregistrer les horaires
+            </button>
+          </div>
+
+          <div class="dash-grid">
+            <div class="card">
+              <div class="card-head"><div><h3>Heures d'ouverture</h3><small>Le site affiche automatiquement « Ouvert / Fermé » selon cette grille</small></div></div>
+              <div class="card-body"><div class="hours-grid" id="hoursGrid"></div></div>
+            </div>
+
+            <div>
+              <div class="card" style="margin-bottom:16px;">
+                <div class="card-head"><div><h3>Paramètres de réservation</h3><small>Créneaux, capacité et délai minimum</small></div></div>
+                <div class="card-body">
+                  <div class="param-grid">
+                    <div class="field"><label for="pSlot">Durée d'un créneau (min)</label><input id="pSlot" type="number" min="10" max="120" step="5"></div>
+                    <div class="field"><label for="pPer">Places par créneau</label><input id="pPer" type="number" min="1" max="20"></div>
+                    <div class="field"><label for="pAhead">Jours de réservation à l'avance</label><input id="pAhead" type="number" min="1" max="120"></div>
+                    <div class="field"><label for="pLead">Délai minimum (heures)</label><input id="pLead" type="number" min="0" max="72"></div>
+                  </div>
+                  <label style="display:flex;align-items:center;gap:10px;font-size:.84rem;font-weight:800;cursor:pointer;">
+                    <span class="switch"><input type="checkbox" id="pEnabled"><i></i></span>
+                    Réservation en ligne activée sur le site
+                  </label>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-head"><div><h3>Jours de fermeture exceptionnelle</h3><small>Fêtes, travaux, congés…</small></div></div>
+                <div class="card-body">
+                  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;">
+                    <div class="field" style="flex:1;min-width:160px;margin-bottom:0;"><label for="closedDate">Date</label><input id="closedDate" type="date"></div>
+                    <button class="btn btn-soft" id="addClosed" type="button">Ajouter</button>
+                  </div>
+                  <div class="chips" id="closedChips" style="margin-top:14px;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TEAM ================= -->
+        <section class="panel" id="panel-team">
+          <div class="panel-head">
+            <div>
+              <h2>Équipe médicale</h2>
+              <p>Le collectif affiché sur la page d'accueil. Chaque praticien peut être rattaché à une spécialité : les patients pourront alors le choisir lors de la réservation.</p>
+            </div>
+            <button class="btn btn-primary" id="newTeamBtn" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+              Ajouter un praticien
+            </button>
+          </div>
+          <div class="team-grid" id="teamGrid"></div>
+        </section>
+
+        <!-- ================= SERVICES ================= -->
+        <section class="panel" id="panel-services">
+          <div class="panel-head">
+            <div>
+              <h2>Spécialités médicales</h2>
+              <p>Ce que les visiteurs découvrent sur la page « Services », groupé par pôle (consultation, imagerie, laboratoire).</p>
+            </div>
+            <button class="btn btn-primary" id="addServiceBtn" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+              Ajouter une spécialité
+            </button>
+          </div>
+          <div id="servicesList"></div>
+        </section>
+
+        <!-- ================= CONTENT ================= -->
+        <section class="panel" id="panel-content">
+          <div class="panel-head">
+            <div>
+              <h2>Textes &amp; vitrine</h2>
+              <p>Bandeau d'annonce, titre de la page d'accueil, statistiques, avis patients et questions fréquentes — tout est modifiable sans toucher au code.</p>
+            </div>
+            <button class="btn btn-primary" id="saveContent" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+              Enregistrer les textes
+            </button>
+          </div>
+
+          <div class="content-grid">
+            <div>
+              <div class="card" style="margin-bottom:16px;">
+                <div class="card-head"><div><h3>Bandeau d'annonce</h3><small>La barre colorée en haut de toutes les pages</small></div></div>
+                <div class="card-body">
+                  <label style="display:flex;align-items:center;gap:10px;font-size:.84rem;font-weight:800;cursor:pointer;margin-bottom:12px;">
+                    <span class="switch"><input type="checkbox" id="annEnabled"><i></i></span>
+                    Afficher le bandeau
+                  </label>
+                  <div class="field"><label for="annText">Message</label><input id="annText" type="text" maxlength="160" placeholder="ex. Nouvel échographe disponible dès lundi."></div>
+                </div>
+              </div>
+
+              <div class="card" style="margin-bottom:16px;">
+                <div class="card-head"><div><h3>Accueil — en-tête</h3><small>Le grand titre de la page d'accueil</small></div></div>
+                <div class="card-body">
+                  <div class="field"><label for="hEyebrow">Sur-titre</label><input id="hEyebrow" type="text"></div>
+                  <div class="modal-2col">
+                    <div class="field"><label for="hTitle">Titre</label><input id="hTitle" type="text"></div>
+                    <div class="field"><label for="hTitleEm">Titre en italique</label><input id="hTitleEm" type="text"></div>
+                  </div>
+                  <div class="field"><label for="hLede">Paragraphe</label><textarea id="hLede" rows="3"></textarea></div>
+                  <div class="preview-box">
+                    <div class="pv-eyebrow" id="pvEyebrow">—</div>
+                    <h4 id="pvTitle">—</h4>
+                    <p id="pvLede">—</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-head">
+                  <div><h3>Statistiques (3 chiffres)</h3><small>Affichées sous le bouton de réservation</small></div>
+                  <button class="btn btn-ghost btn-sm" id="addStat" type="button">+ Ajouter</button>
+                </div>
+                <div class="card-body"><div id="statRows"></div></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="card" style="margin-bottom:16px;">
+                <div class="card-head">
+                  <div><h3>Avis patients</h3><small>Témoignages affichés sur l'accueil</small></div>
+                  <button class="btn btn-ghost btn-sm" id="addRev" type="button">+ Ajouter</button>
+                </div>
+                <div class="card-body"><div id="revRows"></div></div>
+              </div>
+
+              <div class="card">
+                <div class="card-head">
+                  <div><h3>Questions fréquentes</h3><small>Section FAQ de l'accueil</small></div>
+                  <button class="btn btn-ghost btn-sm" id="addFaq" type="button">+ Ajouter</button>
+                </div>
+                <div class="card-body"><div id="faqRows"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="save-note" id="contentNote"></div>
+        </section>
+
+        <!-- ================= MESSAGES ================= -->
+        <section class="panel" id="panel-messages">
+          <div class="panel-head">
+            <div>
+              <h2>Messages reçus</h2>
+              <p>Demandes envoyées depuis la page rendez-vous et demandes de rappel de l'assistant d'orientation.</p>
+            </div>
+            <div class="panel-tools">
+              <button class="btn btn-ghost" id="exportMsgs" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                Exporter CSV
+              </button>
+              <button class="btn btn-ghost" id="readAllBtn" type="button">Tout marquer comme lu</button>
+              <button class="btn btn-danger" id="clearMsgsBtn" type="button">Tout effacer</button>
+            </div>
+          </div>
+
+          <div class="filters">
+            <div class="search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input id="mSearch" type="search" placeholder="Nom, téléphone, message…">
+            </div>
+            <select id="mFilter">
+              <option value="all">Tous les messages</option>
+              <option value="unread">Non lus uniquement</option>
+              <option value="assistant">Orientations (assistant)</option>
+              <option value="form">Formulaire de rendez-vous</option>
+            </select>
+          </div>
+
+          <div id="messagesList"></div>
+        </section>
+
+        <!-- ================= BACKUP ================= -->
+        <section class="panel" id="panel-backup">
+          <div class="panel-head">
+            <div>
+              <h2>Sauvegarde &amp; maintenance</h2>
+              <p>Toutes les données vivent dans le navigateur (localStorage). Exportez-les régulièrement pour les conserver ou les transférer vers un autre poste.</p>
+            </div>
+          </div>
+
+          <div class="dash-grid-2">
+            <div class="card card-pad">
+              <h3 style="font-size:1.05rem;">Exporter toute la configuration</h3>
+              <p style="font-size:.86rem;color:var(--ink-soft);margin-top:8px;line-height:1.6;">Services, équipe, horaires, textes, rendez-vous et messages réunis dans un fichier <b>.json</b>. À conserver en lieu sûr.</p>
+              <button class="btn btn-primary" id="exportAll" type="button" style="margin-top:16px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                Télécharger la sauvegarde
+              </button>
+            </div>
+
+            <div class="card card-pad">
+              <h3 style="font-size:1.05rem;">Restaurer une sauvegarde</h3>
+              <p style="font-size:.86rem;color:var(--ink-soft);margin-top:8px;line-height:1.6;">Remplace <b>toutes</b> les données actuelles par celles du fichier choisi. Action irréversible.</p>
+              <label class="btn btn-ghost" style="margin-top:16px;cursor:pointer;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                Choisir un fichier .json
+                <input type="file" id="importFile" accept="application/json,.json" style="display:none;">
+              </label>
+            </div>
+
+            <div class="card card-pad">
+              <h3 style="font-size:1.05rem;">Réinitialiser la démonstration</h3>
+              <p style="font-size:.86rem;color:var(--ink-soft);margin-top:8px;line-height:1.6;">Supprime les rendez-vous et messages de démonstration, puis repart d'une console vide (les spécialités, l'équipe et les horaires sont conservés).</p>
+              <button class="btn btn-ghost" id="wipeDemo" type="button" style="margin-top:16px;">Vider rendez-vous &amp; messages</button>
+            </div>
+
+            <div class="card card-pad">
+              <h3 style="font-size:1.05rem;">Rétablir les valeurs d'origine</h3>
+              <p style="font-size:.86rem;color:var(--ink-soft);margin-top:8px;line-height:1.6;">Remet les textes, horaires, statistiques, avis et FAQ tels qu'ils étaient à l'installation.</p>
+              <button class="btn btn-danger" id="resetSettings" type="button" style="margin-top:16px;">Restaurer les textes d'origine</button>
+            </div>
+          </div>
+          <div class="save-note" id="backupNote"></div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODALS ================= -->
+<div class="modal-overlay" id="apptModal">
+  <div class="modal-card">
+    <h3 id="apptModalTitle">Nouveau rendez-vous</h3>
+    <div class="modal-2col">
+      <div class="field"><label for="aName">Nom du patient *</label><input id="aName" type="text" placeholder="Nom complet"></div>
+      <div class="field"><label for="aPhone">Téléphone *</label><input id="aPhone" type="tel" placeholder="05XX XX XX XX"></div>
+    </div>
+    <div class="modal-2col">
+      <div class="field"><label for="aService">Spécialité</label><select id="aService"></select></div>
+      <div class="field"><label for="aTeam">Praticien</label><select id="aTeam"></select></div>
+    </div>
+    <div class="modal-2col">
+      <div class="field"><label for="aDate">Date *</label><input id="aDate" type="date"></div>
+      <div class="field"><label for="aTime">Heure *</label><input id="aTime" type="time" step="900"></div>
+    </div>
+    <div class="field"><label for="aNote">Motif / note</label><textarea id="aNote" rows="3" placeholder="Motif de la consultation, consigne particulière…"></textarea></div>
+    <div class="save-note" id="apptNote"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="apptCancel" type="button">Annuler</button>
+      <button class="btn btn-primary" id="apptSave" type="button">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="teamModal">
+  <div class="modal-card">
+    <h3 id="teamModalTitle">Ajouter un praticien</h3>
+    <div class="modal-2col">
+      <div class="field"><label for="tName">Nom *</label><input id="tName" type="text" placeholder="Dr. Prénom Nom"></div>
+      <div class="field"><label for="tRole">Spécialité / rôle</label><input id="tRole" type="text" placeholder="Cardiologue"></div>
+    </div>
+    <div class="modal-2col">
+      <div class="field"><label for="tGroup">Pôle</label><select id="tGroup"><option value="consultation">Consultation</option><option value="imagerie">Imagerie</option><option value="laboratoire">Laboratoire</option></select></div>
+      <div class="field"><label for="tService">Rattaché à la spécialité</label><select id="tService"></select></div>
+    </div>
+    <div class="field"><label for="tRoom">Salle / localisation</label><input id="tRoom" type="text" placeholder="Salle 12 — 1er étage"></div>
+    <div class="field"><label for="tBio">Présentation</label><textarea id="tBio" rows="3" placeholder="Domaines, examens, approche…"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="teamCancel" type="button">Annuler</button>
+      <button class="btn btn-primary" id="teamSave" type="button">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="svcModal">
+  <div class="modal-card">
+    <h3 id="svcModalTitle">Ajouter une spécialité</h3>
+    <div class="field"><label for="svcTitle">Titre</label><input id="svcTitle" type="text" placeholder="ex. Médecin cardiologue"></div>
+    <div class="modal-2col">
+      <div class="field"><label for="svcTag">Catégorie</label><input id="svcTag" type="text" placeholder="ex. Cœur &amp; circulation"></div>
+      <div class="field"><label for="svcGroup">Pôle</label><select id="svcGroup"><option value="consultation">Consultation</option><option value="imagerie">Imagerie</option><option value="laboratoire">Laboratoire</option></select></div>
+    </div>
+    <div class="field"><label for="svcEyebrow">Libellé court (affiché dans la fenêtre détaillée)</label><input id="svcEyebrow" type="text" placeholder="ex. Cardiologie"></div>
+    <div class="field"><label for="svcDesc">Description</label><textarea id="svcDesc" rows="4" placeholder="Décrivez cette spécialité pour les visiteurs…"></textarea></div>
+    <div class="field"><label for="svcIcon">Icône (code SVG, optionnel)</label><textarea id="svcIcon" rows="2" placeholder='ex. &lt;circle cx="12" cy="12" r="9"/&gt;'></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="svcCancelBtn" type="button">Annuler</button>
+      <button class="btn btn-primary" id="svcSaveBtn" type="button">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastWrap"></div>
+
+<script>
+/* ==========================================================
+   CLINIQUE LES LILAS — CONSOLE D'ADMINISTRATION
+   Partie 1 : auth, navigation, tableau de bord
+   ========================================================== */
+const DEFAULT_ICON = '<path d="M12 21c-4.4-2.9-8-6.9-8-11a8 8 0 0 1 16 0c0 4.1-3.6 8.1-8 11Z"/><circle cx="12" cy="10" r="2.6"/>';
+const ADMIN_PASSWORD = 'lilas2026'; // changez ce mot de passe avant publication
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ICONS = {
+  cal:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 11h18"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  msg:'<path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/>',
+  user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  svc:'<path d="M12 21c-4.4-2.9-8-6.9-8-11a8 8 0 0 1 16 0c0 4.1-3.6 8.1-8 11Z"/><circle cx="12" cy="10" r="2.6"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  edit:'<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4Z"/>',
+  trash:'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/>',
+  phone:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  ban:'<circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/>'
+};
+const svgIco = (d, cls) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"' + (cls ? ' class="' + cls + '"' : '') + '>' + d + '</svg>';
+
+/* ---------- toast ---------- */
+function toast(msg, icon){
+  const wrap = $('toastWrap');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = svgIco(icon || ICONS.check) + '<span>' + esc(msg) + '</span>';
+  wrap.appendChild(t);
+  requestAnimationFrame(()=> t.classList.add('in'));
+  setTimeout(()=>{ t.classList.remove('in'); setTimeout(()=> t.remove(), 400); }, 3000);
+}
+
+/* ---------- auth ---------- */
+const gate = $('gate'), app = $('app');
+function unlock(){
+  gate.style.display = 'none';
+  app.classList.add('show');
+  try{ sessionStorage.setItem('lilas_admin_auth','1'); }catch(e){}
+  renderAll();
+}
+(function initGate(){
+  $('gK1').textContent = lilasGetAppointments().length;
+  $('gK2').textContent = lilasGetServices().length;
+  $('gK3').textContent = lilasGetTeam().length;
+  const go = ()=>{
+    if($('gatePwd').value === ADMIN_PASSWORD){ unlock(); }
+    else{ $('gateErr').textContent = 'Mot de passe incorrect.'; $('gatePwd').value=''; $('gatePwd').focus(); }
+  };
+  $('gateBtn').addEventListener('click', go);
+  $('gatePwd').addEventListener('keydown', e=>{ if(e.key === 'Enter') go(); });
+  $('logoutBtn').addEventListener('click', ()=>{ try{ sessionStorage.removeItem('lilas_admin_auth'); }catch(e){} location.reload(); });
+  $('gatePwd').focus();
+})();
+
+/* ---------- tabs ---------- */
+const TAB_TITLES = {
+  dashboard:['Tableau de bord',"Vue d'ensemble de l'activité de la clinique"],
+  appointments:['Rendez-vous','Réservations reçues en ligne et saisies à l\'accueil'],
+  hours:['Agenda & horaires','Jours d\'ouverture, créneaux et fermetures exceptionnelles'],
+  team:['Équipe médicale','Le collectif visible sur le site public'],
+  services:['Spécialités médicales','Les expertises proposées, groupées par pôle'],
+  content:['Textes & vitrine','Bandeau, titre d\'accueil, avis et questions fréquentes'],
+  messages:['Messages reçus','Demandes de contact et orientations de l\'assistant'],
+  backup:['Sauvegarde','Exporter, restaurer ou réinitialiser les données']
+};
+let currentTab = 'dashboard';
+function gotoTab(tab){
+  currentTab = tab;
+  document.querySelectorAll('.side-link').forEach(b=> b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.panel').forEach(p=> p.classList.toggle('active', p.id === 'panel-' + tab));
+  const t = TAB_TITLES[tab] || ['',''];
+  $('pageTitle').textContent = t[0];
+  $('pageSub').textContent = t[1];
+  $('side').classList.remove('open');
+  window.scrollTo({top:0, behavior:'smooth'});
+  if(tab === 'dashboard') renderDashboard();
+  if(tab === 'appointments'){ renderAppointments(); }
+  if(tab === 'hours') renderHours();
+  if(tab === 'team') renderTeam();
+  if(tab === 'services') renderServices();
+  if(tab === 'content') renderContent();
+  if(tab === 'messages') renderMessages();
+}
+document.querySelectorAll('.side-link').forEach(b=> b.addEventListener('click', ()=> gotoTab(b.dataset.tab)));
+document.querySelectorAll('[data-goto-tab]').forEach(b=> b.addEventListener('click', ()=> gotoTab(b.dataset.gotoTab)));
+$('menuBtn').addEventListener('click', ()=> $('side').classList.toggle('open'));
+document.addEventListener('click', e=>{
+  const side = $('side');
+  if(window.innerWidth <= 980 && side.classList.contains('open') && !side.contains(e.target) && e.target !== $('menuBtn') && !$('menuBtn').contains(e.target)){
+    side.classList.remove('open');
+  }
+});
+
+/* ---------- clock ---------- */
+function tickClock(){
+  const d = new Date();
+  $('adminClock').textContent = d.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'}) +
+    ' · ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+}
+tickClock();
+setInterval(tickClock, 30000);
+
+/* ---------- sidebar badges ---------- */
+function renderBadges(){
+  const msgs = lilasGetMessages();
+  const unread = msgs.filter(m=> !m.read).length;
+  const pending = lilasGetAppointments().filter(a=> a.status === 'nouveau').length;
+  const setB = (id, n, alert)=>{
+    const el = $(id);
+    el.textContent = n;
+    el.style.display = n ? '' : 'none';
+    el.classList.toggle('alert', !!alert && n > 0);
+  };
+  setB('sbMsgs', unread, true);
+  setB('sbAppts', pending, true);
+  setB('sbTeam', lilasGetTeam().length, false);
+  setB('sbSvc', lilasGetServices().length, false);
+}
+
+/* ==========================================================
+   DASHBOARD
+   ========================================================== */
+function renderDashboard(){
+  const appts = lilasGetAppointments();
+  const msgs = lilasGetMessages();
+  const today = lilasToday();
+  const now = new Date();
+
+  const tList = appts.filter(a=> a.date === today && a.status !== 'annule');
+  const pending = appts.filter(a=> a.status === 'nouveau').length;
+  const upcoming = appts.filter(a=> a.status !== 'annule' && a.date >= today).length;
+  const weekDays = [...Array(7)].map((_,i)=> lilasAddDays(today, i));
+  let weekSlots = 0, weekTaken = 0;
+  weekDays.forEach(d=>{
+    lilasSlotsFor(d, true).forEach(s=>{ weekSlots++; weekTaken += Math.min(s.taken, s.total); });
+  });
+  const occ = weekSlots ? Math.round((weekTaken / weekSlots) * 100) : 0;
+  const unread = msgs.filter(m=> !m.read).length;
+
+  /* sparkline: 7 last days volume */
+  const spark = [...Array(7)].map((_,i)=>{
+    const d = lilasAddDays(today, i - 6);
+    return appts.filter(a=> a.date === d && a.status !== 'annule').length;
+  });
+  const sparkMax = Math.max(1, ...spark);
+
+  $('kpiRow').innerHTML = [
+    { ico:ICONS.cal, val:tList.length, lab:"Rendez-vous aujourd'hui", delta:tList.length ? tList.length + ' créneau' + (tList.length > 1 ? 'x' : '') : 'agenda libre', tone:tList.length ? '' : 'warn',
+      spark:spark },
+    { ico:ICONS.clock, val:pending, lab:'À confirmer', delta:pending ? 'action requise' : 'à jour', tone:pending > 4 ? 'bad' : (pending ? 'warn' : ''), spark:null },
+    { ico:ICONS.check, val:upcoming, lab:'Rendez-vous à venir', delta:occ + '% de remplissage 7j', tone:occ > 75 ? 'warn' : '', spark:null },
+    { ico:ICONS.msg, val:unread, lab:'Messages non lus', delta:unread ? unread + ' à traiter' : 'boîte vide', tone:unread ? 'warn' : '', spark:null }
+  ].map(k=>
+    '<div class="kpi"><div class="kpi-top"><div class="kpi-ico">' + svgIco(k.ico) + '</div>' +
+    '<span class="kpi-delta ' + k.tone + '">' + esc(k.delta) + '</span></div>' +
+    '<b>' + k.val + '</b><small>' + esc(k.lab) + '</small>' +
+    (k.spark ? '<div class="spark">' + k.spark.map(v=> '<i style="height:' + Math.max(10, (v / sparkMax) * 100) + '%"></i>').join('') + '</div>' : '') +
+    '</div>'
+  ).join('');
+
+  $('chartDaily').innerHTML = chartDaily(14);
+  $('chartStatus').innerHTML = chartStatus(appts);
+  $('chartServices').innerHTML = chartServices(appts);
+  renderJournal();
+  renderUpcoming(appts, today);
+}
+
+function chartDaily(n){
+  const appts = lilasGetAppointments();
+  const today = lilasToday();
+  const days = [...Array(n)].map((_,i)=> lilasAddDays(today, i - n + 1));
+  const data = days.map(d=>{
+    const list = appts.filter(a=> a.date === d && a.status !== 'annule');
+    return {
+      d: d,
+      confirme: list.filter(a=> a.status === 'confirme').length,
+      nouveau: list.filter(a=> a.status === 'nouveau').length,
+      termine: list.filter(a=> a.status === 'termine').length,
+      total: list.length
+    };
+  });
+  const max = Math.max(1, ...data.map(x=> x.total));
+  const W = 640, H = 200, pad = 26, bw = (W - pad) / n - 6;
+  const bars = data.map((x, i)=>{
+    const x0 = pad + i * ((W - pad) / n) + 3;
+    let y = H - 30;
+    const seg = (v, color)=>{
+      if(!v) return '';
+      const h = (v / max) * (H - 66);
+      y -= h;
+      return '<rect x="' + x0.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(2, h).toFixed(1) + '" rx="4" fill="' + color + '"/>';
+    };
+    const s = seg(x.termine, 'url(#gDone)') + seg(x.confirme, 'url(#gOk)') + seg(x.nouveau, 'url(#gNew)');
+    const isToday = x.d === today;
+    const lbl = (i % 2 === 0 || isToday) ? '<text x="' + (x0 + bw/2).toFixed(1) + '" y="' + (H - 12) + '" text-anchor="middle" font-size="9" font-weight="700" fill="' + (isToday ? '#8B2C6B' : '#6b5468') + '" font-family="Manrope">' + lilasParseYmd(x.d).getDate() + '</text>' : '';
+    const cnt = x.total ? '<text x="' + (x0 + bw/2).toFixed(1) + '" y="' + (y - 5).toFixed(1) + '" text-anchor="middle" font-size="9" font-weight="800" fill="#8B2C6B" font-family="Manrope">' + x.total + '</text>' : '';
+    const todayLine = isToday ? '<line x1="' + (x0 - 3).toFixed(1) + '" y1="18" x2="' + (x0 - 3).toFixed(1) + '" y2="' + (H - 26) + '" stroke="#F3B8D4" stroke-dasharray="3 3"/>' : '';
+    return todayLine + s + cnt + lbl;
+  }).join('');
+  return '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Rendez-vous sur 14 jours">' +
+    '<defs>' +
+      '<linearGradient id="gOk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A73B82"/><stop offset="1" stop-color="#8B2C6B"/></linearGradient>' +
+      '<linearGradient id="gDone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D96BA6"/><stop offset="1" stop-color="#A73B82"/></linearGradient>' +
+      '<linearGradient id="gNew" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7CFE1"/><stop offset="1" stop-color="#F3B8D4"/></linearGradient>' +
+    '</defs>' +
+    '<line x1="' + pad + '" y1="' + (H - 30) + '" x2="' + W + '" y2="' + (H - 30) + '" stroke="#EADCE6"/>' +
+    bars + '</svg>' +
+    '<div class="chart-legend">' +
+      '<span><i style="background:linear-gradient(180deg,#D96BA6,#A73B82)"></i>Terminés</span>' +
+      '<span><i style="background:linear-gradient(180deg,#A73B82,#8B2C6B)"></i>Confirmés</span>' +
+      '<span><i style="background:linear-gradient(180deg,#F7CFE1,#F3B8D4)"></i>À confirmer</span>' +
+    '</div>';
+}
+
+function chartStatus(appts){
+  const counts = { nouveau:0, confirme:0, termine:0, annule:0 };
+  appts.forEach(a=>{ counts[a.status] = (counts[a.status] || 0) + 1; });
+  const total = appts.length || 1;
+  const colors = { confirme:'#8B2C6B', nouveau:'#E8973A', termine:'#7E57C2', annule:'#D9536F' };
+  const labels = { confirme:'Confirmés', nouveau:'À confirmer', termine:'Terminés', annule:'Annulés' };
+  const R = 52, C = 2 * Math.PI * R;
+  let acc = 0;
+  const segs = Object.keys(counts).map(k=>{
+    const frac = counts[k] / total;
+    const dash = (frac * C).toFixed(2);
+    const off = (-acc * C).toFixed(2);
+    acc += frac;
+    return '<circle cx="70" cy="70" r="' + R + '" fill="none" stroke="' + colors[k] + '" stroke-width="18" stroke-dasharray="' + dash + ' ' + (C - dash).toFixed(2) + '" stroke-dashoffset="' + off + '" stroke-linecap="butt"/>';
+  }).join('');
+  const rows = Object.keys(counts).map(k=>
+    '<div class="donut-row"><i style="background:' + colors[k] + '"></i><span>' + labels[k] + '</span><b>' + counts[k] + '</b></div>'
+  ).join('');
+  return '<div class="donut-wrap">' +
+    '<svg width="140" height="140" viewBox="0 0 140 140" style="flex-shrink:0;">' +
+      '<circle cx="70" cy="70" r="' + R + '" fill="none" stroke="#FBEAF3" stroke-width="18"/>' +
+      '<g transform="rotate(-90 70 70)">' + segs + '</g>' +
+      '<text x="70" y="66" text-anchor="middle" class="donut-center">' + appts.length + '</text>' +
+      '<text x="70" y="86" text-anchor="middle" class="donut-sub">rendez-vous</text>' +
+    '</svg>' +
+    '<div class="donut-list">' + rows + '</div>' +
+  '</div>';
+}
+
+function chartServices(appts){
+  const counts = {};
+  appts.filter(a=> a.status !== 'annule').forEach(a=>{ counts[a.service || 'Consultation générale'] = (counts[a.service || 'Consultation générale'] || 0) + 1; });
+  const rows = Object.entries(counts).sort((a,b)=> b[1] - a[1]).slice(0, 7);
+  if(!rows.length) return '<div class="empty">' + svgIco(ICONS.svc) + 'Aucun rendez-vous enregistré pour l\'instant.</div>';
+  const max = rows[0][1] || 1;
+  return '<div class="hbars">' + rows.map(r=>
+    '<div class="hbar-row"><span class="hb-name" title="' + esc(r[0]) + '">' + esc(r[0]) + '</span>' +
+    '<span class="hbar-track"><span class="hbar-fill" style="width:' + Math.max(4, (r[1] / max) * 100) + '%"></span></span>' +
+    '<span class="hb-val">' + r[1] + '</span></div>'
+  ).join('') + '</div>';
+}
+
+function renderJournal(){
+  const items = lilasGetActivity().slice(0, 9);
+  const kindIcon = { rdv:ICONS.cal, svc:ICONS.svc, msg:ICONS.msg, team:ICONS.user, contact:ICONS.phone, settings:ICONS.edit };
+  const box = $('journalList');
+  if(!items.length){ box.innerHTML = '<div class="empty">' + svgIco(ICONS.clock) + 'Aucune action enregistrée pour le moment.</div>'; return; }
+  box.innerHTML = '<div class="journal">' + items.map(it=>{
+    const d = new Date(it.date);
+    const when = d.toLocaleDateString('fr-FR', {day:'numeric', month:'short'}) + ' · ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+    return '<div class="journal-item"><div class="journal-dot">' + svgIco(kindIcon[it.kind] || ICONS.clock) + '</div>' +
+      '<div><p>' + esc(it.text) + '</p><small>' + when + '</small></div></div>';
+  }).join('') + '</div>';
+}
+$('clearJournal').addEventListener('click', ()=>{
+  if(!confirm('Vider le journal d\'activité ?')) return;
+  lilasClearActivity();
+  renderJournal();
+  toast('Journal vidé.');
+});
+
+function renderUpcoming(appts, today){
+  const list = appts.filter(a=> a.status === 'nouveau' || a.status === 'confirme').sort((a,b)=> (a.date + a.time).localeCompare(b.date + b.time)).slice(0, 6);
+  const box = $('upcomingList');
+  if(!list.length){ box.innerHTML = '<div class="empty">' + svgIco(ICONS.cal) + 'Aucun rendez-vous à venir. Les nouvelles réservations apparaîtront ici.</div>'; return; }
+  box.innerHTML = '<div class="table-wrap"><table class="tbl"><thead><tr>' +
+    '<th>Code</th><th>Patient</th><th>Spécialité</th><th>Quand</th><th>Statut</th><th></th>' +
+    '</tr></thead><tbody>' + list.map(a=>{
+      const st = LILAS_STATUS[a.status] || LILAS_STATUS.nouveau;
+      return '<tr' + (a.date === today ? ' class="today"' : '') + '>' +
+        '<td><span class="ref-code">' + esc(a.ref) + '</span></td>' +
+        '<td><div class="pt-name">' + esc(a.name) + '</div><div class="pt-sub">' + esc(a.phone) + '</div></td>' +
+        '<td>' + esc(a.service) + '<div class="pt-sub">' + esc(a.team || 'Praticien au choix') + '</div></td>' +
+        '<td style="text-transform:capitalize;">' + esc(lilasDateLabel(a.date)) + '<div class="pt-sub">' + esc(a.time) + '</div></td>' +
+        '<td><span class="badge-status ' + st.tone + '"><i></i>' + st.label + '</span></td>' +
+        '<td style="text-align:right;"><button class="btn btn-ghost btn-sm" data-open-appt="' + a.id + '" type="button">Ouvrir</button></td>' +
+      '</tr>';
+    }).join('') + '</tbody></table></div>';
+  box.querySelectorAll('[data-open-appt]').forEach(b=> b.addEventListener('click', ()=>{
+    gotoTab('appointments');
+    setTimeout(()=>{
+      const inp = $('fSearch');
+      const a = lilasGetAppointments().find(x=> x.id === b.dataset.openAppt);
+      if(a){ inp.value = a.ref; renderAppointments(); }
+    }, 120);
+  }));
+}
+
+/* ==========================================================
+   Partie 2 : rendez-vous + agenda/horaires
+   ========================================================== */
+const state = { calMonth: lilasYmd(new Date()).slice(0,7), apptView:'list', apptDay:null, editingAppt:null };
+
+/* ---------- filters ---------- */
+function fillServiceSelects(){
+  const services = lilasGetServices();
+  const keepF = $('fService').value, keepA = $('aService').value, keepT = $('tService').value, keepAt = $('aTeam').value;
+  const f = $('fService');
+  f.innerHTML = '<option value="all">Toutes les spécialités</option>' +
+    '<option value="Consultation générale">Consultation générale</option>' +
+    services.map(s=> '<option value="' + esc(s.title) + '">' + esc(s.title) + '</option>').join('');
+  const a = $('aService');
+  a.innerHTML = '<option value="Consultation générale">Consultation générale</option>' +
+    services.map(s=> '<option value="' + esc(s.title) + '">' + esc(s.title) + '</option>').join('');
+  const t = $('tService');
+  t.innerHTML = '<option value="">Aucun rattachement</option>' +
+    services.map(s=> '<option value="' + esc(s.id) + '">' + esc(s.title) + '</option>').join('');
+  const at = $('aTeam');
+  at.innerHTML = '<option value="">Premier disponible</option>' +
+    lilasGetTeam().map(m=> '<option value="' + esc(m.name) + '">' + esc(m.name) + ' — ' + esc(m.role || '') + '</option>').join('');
+  /* conserver les sélections en cours */
+  if(keepF && [...f.options].some(o=> o.value === keepF)) f.value = keepF;
+  if(keepA && [...a.options].some(o=> o.value === keepA)) a.value = keepA;
+  if(keepT && [...t.options].some(o=> o.value === keepT)) t.value = keepT;
+  if(keepAt && [...at.options].some(o=> o.value === keepAt)) at.value = keepAt;
+}
+
+function filteredAppts(){
+  const q = $('fSearch').value.trim().toLowerCase();
+  const st = $('fStatus').value;
+  const svc = $('fService').value;
+  const day = $('fDay').value;
+  const today = lilasToday();
+  return lilasGetAppointments().filter(a=>{
+    if(st !== 'all' && a.status !== st) return false;
+    if(svc !== 'all' && (a.service || 'Consultation générale') !== svc) return false;
+    if(state.apptDay && a.date !== state.apptDay) return false;
+    if(day === 'today' && a.date !== today) return false;
+    if(day === 'week' && !(a.date >= today && a.date <= lilasAddDays(today, 7))) return false;
+    if(day === 'past' && a.date >= today) return false;
+    if(q){
+      const hay = [a.name, a.phone, a.ref, a.service, a.team, a.note].join(' ').toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  }).sort((a,b)=> (b.date + b.time).localeCompare(a.date + a.time));
+}
+
+function renderAppointments(){
+  fillServiceSelects();
+  const list = filteredAppts();
+  const box = $('apptList');
+  if(!list.length){
+    box.innerHTML = '<div class="empty">' + svgIco(ICONS.cal) + 'Aucun rendez-vous ne correspond à ces filtres.<br>Ajustez la recherche ou créez un rendez-vous depuis la page de réservation du site.</div>';
+  } else {
+    box.innerHTML = '<table class="tbl"><thead><tr>' +
+      '<th>Code</th><th>Patient</th><th>Spécialité / praticien</th><th>Date &amp; heure</th><th>Rappel</th><th>Statut</th><th style="text-align:right;">Actions</th>' +
+      '</tr></thead><tbody>' + list.map(a=>{
+        const st = LILAS_STATUS[a.status] || LILAS_STATUS.nouveau;
+        const today = lilasToday();
+        return '<tr' + (a.date === today ? ' class="today"' : '') + '>' +
+          '<td><span class="ref-code">' + esc(a.ref) + '</span>' + (a.demo ? ' <span class="demo-tag">démo</span>' : '') + '</td>' +
+          '<td><div class="pt-name">' + esc(a.name) + '</div><div class="pt-sub">' + esc(a.phone) + (a.email ? ' · ' + esc(a.email) : '') + '</div></td>' +
+          '<td>' + esc(a.service || 'Consultation générale') + '<div class="pt-sub">' + esc(a.team || 'Praticien au choix') + '</div>' +
+            (a.note ? '<div class="pt-sub" title="' + esc(a.note) + '">📝 ' + esc(a.note.slice(0, 48)) + (a.note.length > 48 ? '…' : '') + '</div>' : '') + '</td>' +
+          '<td style="white-space:nowrap;text-transform:capitalize;">' + esc(lilasParseYmd(a.date).getDate()) + ' ' + esc(LILAS_MONTHS[lilasParseYmd(a.date).getMonth()].slice(0,4)) + '.' +
+            '<div class="pt-sub">' + esc(a.time) + ' · ' + esc(LILAS_DAYS_SHORT[lilasParseYmd(a.date).getDay()]) + '</div></td>' +
+          '<td style="font-size:.76rem;color:var(--ink-soft);">' + esc({tel:'Téléphone', sms:'SMS', email:'E-mail'}[a.reminder] || '—') + '</td>' +
+          '<td><select class="status-select" data-status="' + a.id + '">' +
+            Object.keys(LILAS_STATUS).map(k=> '<option value="' + k + '"' + (a.status === k ? ' selected' : '') + '>' + LILAS_STATUS[k].label + '</option>').join('') +
+          '</select></td>' +
+          '<td><div class="row-actions">' +
+            '<button class="icon-btn" data-edit="' + a.id + '" title="Modifier">' + svgIco(ICONS.edit) + '</button>' +
+            '<button class="icon-btn bad" data-del="' + a.id + '" title="Supprimer">' + svgIco(ICONS.trash) + '</button>' +
+          '</div></td>' +
+        '</tr>';
+      }).join('') + '</tbody></table>';
+  }
+
+  box.querySelectorAll('[data-status]').forEach(sel=> sel.addEventListener('change', ()=>{
+    const a = lilasUpdateAppointment(sel.dataset.status, { status: sel.value });
+    if(a){
+      lilasAddActivity('Rendez-vous ' + a.ref + ' : statut passé à « ' + (LILAS_STATUS[sel.value] || {}).label + ' »', 'rdv');
+      toast(a.ref + ' → ' + (LILAS_STATUS[sel.value] || {}).label);
+    }
+    renderBadges();
+    if(currentTab === 'appointments') renderAgenda();
+  }));
+  box.querySelectorAll('[data-del]').forEach(b=> b.addEventListener('click', ()=>{
+    const a = lilasGetAppointments().find(x=> x.id === b.dataset.del);
+    if(!a || !confirm('Supprimer définitivement le rendez-vous ' + a.ref + ' ?')) return;
+    lilasDeleteAppointment(a.id);
+    lilasAddActivity('Rendez-vous ' + a.ref + ' supprimé', 'rdv');
+    toast('Rendez-vous supprimé.', ICONS.trash);
+    renderAll();
+  }));
+  box.querySelectorAll('[data-edit]').forEach(b=> b.addEventListener('click', ()=> openApptModal(b.dataset.edit)));
+
+  renderAgenda();
+}
+
+/* ---------- agenda calendar ---------- */
+function renderAgenda(){
+  const [y, m] = state.calMonth.split('-').map(Number);
+  const first = new Date(y, m-1, 1);
+  $('agTitle').textContent = LILAS_MONTHS[m-1] + ' ' + y;
+  const grid = $('agGrid');
+  grid.innerHTML = '';
+  ['L','M','M','J','V','S','D'].forEach(d=>{
+    const el = document.createElement('div');
+    el.className = 'ag-dow'; el.textContent = d;
+    grid.appendChild(el);
+  });
+  const offset = (first.getDay() + 6) % 7;
+  for(let i=0;i<offset;i++){
+    const el = document.createElement('div');
+    el.className = 'ag-day out';
+    grid.appendChild(el);
+  }
+  const appts = lilasGetAppointments();
+  const today = lilasToday();
+  const days = new Date(y, m, 0).getDate();
+  for(let d=1; d<=days; d++){
+    const ymd = lilasYmd(new Date(y, m-1, d));
+    const list = appts.filter(a=> a.date === ymd).sort((a,b)=> a.time.localeCompare(b.time));
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'ag-day' + (ymd === today ? ' today' : '') + (ymd === state.apptDay ? ' sel' : '');
+    const chips = list.slice(0, 4).map(a=>{
+      const cls = a.status === 'confirme' ? 'ok' : (a.status === 'nouveau' ? 'new' : (a.status === 'annule' ? 'cancel' : ''));
+      return '<span class="ad-chip ' + cls + '">' + esc(a.time) + '</span>';
+    }).join('');
+    btn.innerHTML = '<span class="ad-num">' + d + '</span>' +
+      '<span class="ad-count">' + (list.length ? list.length + ' RDV' : (lilasHoursFor(ymd) ? 'libre' : 'fermé')) + '</span>' +
+      '<span class="ad-chips">' + chips + (list.length > 4 ? '<span class="ad-chip">+' + (list.length - 4) + '</span>' : '') + '</span>';
+    btn.addEventListener('click', ()=>{
+      state.apptDay = (state.apptDay === ymd) ? null : ymd;
+      renderAgenda();
+      renderAppointments();
+      if(state.apptDay) toast('Filtre sur ' + lilasFormatDateFr(ymd));
+    });
+    grid.appendChild(btn);
+  }
+}
+$('agPrev').addEventListener('click', ()=>{
+  const [y,m] = state.calMonth.split('-').map(Number);
+  state.calMonth = lilasYmd(new Date(y, m-2, 1)).slice(0,7);
+  renderAgenda();
+});
+$('agNext').addEventListener('click', ()=>{
+  const [y,m] = state.calMonth.split('-').map(Number);
+  state.calMonth = lilasYmd(new Date(y, m, 1)).slice(0,7);
+  renderAgenda();
+});
+$('viewList').addEventListener('click', ()=>{
+  state.apptView = 'list';
+  $('viewList').classList.add('on'); $('viewAgenda').classList.remove('on');
+  $('apptListCard').classList.remove('off');
+  $('agendaView').classList.remove('on');
+});
+$('viewAgenda').addEventListener('click', ()=>{
+  state.apptView = 'agenda';
+  $('viewAgenda').classList.add('on'); $('viewList').classList.remove('on');
+  $('apptListCard').classList.add('off');
+  $('agendaView').classList.add('on');
+  renderAgenda();
+});
+['fSearch','fStatus','fService','fDay'].forEach(id=> $(id).addEventListener('input', ()=>{
+  state.apptDay = null;
+  renderAppointments();
+}));
+
+/* ---------- CSV export ---------- */
+$('exportAppts').addEventListener('click', ()=>{
+  const rows = [['Code','Patient','Telephone','E-mail','Specialite','Praticien','Date','Heure','Statut','Rappel','Motif','Source']];
+  filteredAppts().forEach(a=> rows.push([
+    a.ref, a.name, a.phone, a.email || '', a.service || 'Consultation générale', a.team || '',
+    a.date, a.time, (LILAS_STATUS[a.status] || {}).label || a.status,
+    {tel:'Téléphone', sms:'SMS', email:'E-mail'}[a.reminder] || '', a.note || '',
+    a.source === 'admin' ? 'saisie accueil' : 'site internet'
+  ]));
+  lilasDownload('les-lilas-rendez-vous-' + lilasToday() + '.csv', lilasToCsv(rows));
+  lilasAddActivity('Export CSV des rendez-vous (' + (rows.length - 1) + ' lignes)', 'rdv');
+  toast('Fichier CSV téléchargé.');
+});
+
+/* ---------- manual appointment modal ---------- */
+function openApptModal(id){
+  state.editingAppt = id || null;
+  fillServiceSelects();
+  const a = id ? lilasGetAppointments().find(x=> x.id === id) : null;
+  $('apptModalTitle').textContent = a ? 'Modifier le rendez-vous ' + a.ref : 'Nouveau rendez-vous (saisie accueil)';
+  $('aName').value = a ? a.name : '';
+  $('aPhone').value = a ? a.phone : '';
+  $('aService').value = a ? (a.service || 'Consultation générale') : 'Consultation générale';
+  $('aTeam').value = a ? (a.team || '') : '';
+  $('aDate').value = a ? a.date : lilasToday();
+  $('aTime').value = a ? a.time : '09:00';
+  $('aNote').value = a ? (a.note || '') : '';
+  $('apptNote').textContent = '';
+  $('apptModal').classList.add('open');
+  $('aName').focus();
+}
+function closeApptModal(){ $('apptModal').classList.remove('open'); }
+$('newApptBtn').addEventListener('click', ()=> openApptModal(null));
+$('apptCancel').addEventListener('click', closeApptModal);
+$('apptModal').addEventListener('click', e=>{ if(e.target === $('apptModal')) closeApptModal(); });
+$('apptSave').addEventListener('click', ()=>{
+  const name = $('aName').value.trim();
+  const phone = $('aPhone').value.trim();
+  const date = $('aDate').value;
+  const time = $('aTime').value;
+  if(name.length < 2 || !date || !time){ $('apptNote').textContent = 'Nom, date et heure sont obligatoires.'; return; }
+  if(state.editingAppt){
+    const a = lilasUpdateAppointment(state.editingAppt, {
+      name, phone, date, time,
+      service: $('aService').value, team: $('aTeam').value, note: $('aNote').value.trim()
+    });
+    lilasAddActivity('Rendez-vous ' + a.ref + ' modifié à la réception', 'rdv');
+    toast('Rendez-vous modifié.');
+  } else {
+    const a = lilasAddAppointment({
+      name, phone, date, time,
+      service: $('aService').value, team: $('aTeam').value, note: $('aNote').value.trim(),
+      status:'confirme', source:'admin'
+    });
+    lilasAddActivity('Rendez-vous ' + a.ref + ' saisi à l\'accueil (' + a.service + ', ' + date + ' ' + time + ')', 'rdv');
+    toast('Rendez-vous ' + a.ref + ' créé et confirmé.');
+  }
+  closeApptModal();
+  renderAll();
+});
+
+/* ==========================================================
+   HORAIRES & PARAMÈTRES
+   ========================================================== */
+function renderHours(){
+  const st = lilasGetSettings();
+  const grid = $('hoursGrid');
+  grid.innerHTML = '';
+  [1,2,3,4,5,6,0].forEach(i=>{
+    const h = st.hours[i] || { open:'08:00', close:'17:00', brk:'' };
+    const open = !!st.hours[i];
+    const brk = (h.brk && h.brk.indexOf('-') > -1) ? h.brk.split('-') : ['',''];
+    const row = document.createElement('div');
+    row.className = 'hours-row' + (open ? '' : ' closed');
+    row.dataset.day = i;
+    row.innerHTML =
+      '<div class="hr-day">' + ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'][i] + '</div>' +
+      '<label class="switch" title="Ouvert ce jour"><input type="checkbox" data-open="' + i + '"' + (open ? ' checked' : '') + '><i></i></label>' +
+      '<div><span class="brk-label">Ouverture</span><input type="time" data-open-t="' + i + '" value="' + esc(h.open) + '"' + (open ? '' : ' disabled') + '></div>' +
+      '<div><span class="brk-label">Fermeture</span><input type="time" data-close-t="' + i + '" value="' + esc(h.close) + '"' + (open ? '' : ' disabled') + '></div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
+        '<div><span class="brk-label">Pause début</span><input type="time" data-brk-a="' + i + '" value="' + esc(brk[0]) + '"' + (open ? '' : ' disabled') + '></div>' +
+        '<div><span class="brk-label">Pause fin</span><input type="time" data-brk-b="' + i + '" value="' + esc(brk[1]) + '"' + (open ? '' : ' disabled') + '></div>' +
+      '</div>';
+    grid.appendChild(row);
+  });
+  grid.querySelectorAll('[data-open]').forEach(cb=> cb.addEventListener('change', ()=>{
+    const row = cb.closest('.hours-row');
+    row.classList.toggle('closed', !cb.checked);
+    row.querySelectorAll('input[type="time"]').forEach(i=> i.disabled = !cb.checked);
+  }));
+
+  $('pSlot').value = st.booking.slotMinutes;
+  $('pPer').value = st.booking.perSlot;
+  $('pAhead').value = st.booking.daysAhead;
+  $('pLead').value = st.booking.leadHours;
+  $('pEnabled').checked = st.booking.enabled !== false;
+  renderClosedChips();
+}
+
+function renderClosedChips(){
+  const st = lilasGetSettings();
+  const box = $('closedChips');
+  const list = (st.booking.closedDates || []).slice().sort();
+  if(!list.length){ box.innerHTML = '<span style="font-size:.8rem;color:var(--ink-soft);">Aucune fermeture exceptionnelle prévue.</span>'; return; }
+  box.innerHTML = list.map(d=>
+    '<span class="chip" style="text-transform:capitalize;">' + esc(lilasFormatDateFr(d)) +
+    '<button type="button" data-rm-closed="' + esc(d) + '" aria-label="Retirer">' + svgIco(ICONS.x) + '</button></span>'
+  ).join('');
+  box.querySelectorAll('[data-rm-closed]').forEach(b=> b.addEventListener('click', ()=>{
+    const st2 = lilasGetSettings();
+    st2.booking.closedDates = (st2.booking.closedDates || []).filter(d=> d !== b.dataset.rmClosed);
+    lilasSetSettings(st2);
+    lilasAddActivity('Fermeture exceptionnelle du ' + b.dataset.rmClosed + ' retirée', 'settings');
+    renderClosedChips();
+  }));
+}
+
+$('addClosed').addEventListener('click', ()=>{
+  const v = $('closedDate').value;
+  if(!v){ toast('Choisissez une date.'); return; }
+  const st = lilasGetSettings();
+  st.booking.closedDates = st.booking.closedDates || [];
+  if(!st.booking.closedDates.includes(v)) st.booking.closedDates.push(v);
+  lilasSetSettings(st);
+  lilasAddActivity('Fermeture exceptionnelle ajoutée le ' + v, 'settings');
+  $('closedDate').value = '';
+  renderClosedChips();
+  toast('Date de fermeture ajoutée.');
+});
+
+$('saveHours').addEventListener('click', ()=>{
+  const st = lilasGetSettings();
+  [1,2,3,4,5,6,0].forEach(i=>{
+    const cb = document.querySelector('input[data-open="' + i + '"]');
+    if(cb && cb.checked){
+      const o = document.querySelector('input[data-open-t="' + i + '"]').value || '08:00';
+      const c = document.querySelector('input[data-close-t="' + i + '"]').value || '17:00';
+      const ba = document.querySelector('input[data-brk-a="' + i + '"]').value;
+      const bb = document.querySelector('input[data-brk-b="' + i + '"]').value;
+      st.hours[i] = { open:o, close:c, brk:(ba && bb && ba < bb) ? (ba + '-' + bb) : '' };
+    } else {
+      st.hours[i] = null;
+    }
+  });
+  st.booking.slotMinutes = Math.max(10, +$('pSlot').value || 30);
+  st.booking.perSlot = Math.max(1, +$('pPer').value || 3);
+  st.booking.daysAhead = Math.max(1, +$('pAhead').value || 30);
+  st.booking.leadHours = Math.max(0, +$('pLead').value || 0);
+  st.booking.enabled = $('pEnabled').checked;
+  lilasSetSettings(st);
+  lilasAddActivity('Horaires et paramètres de réservation mis à jour', 'settings');
+  toast('Horaires enregistrés. Le site public est à jour.');
+  renderBadges();
+});
+
+/* ==========================================================
+   Partie 3 : équipe, spécialités, textes, messages, sauvegarde
+   ========================================================== */
+
+/* ---------- ÉQUIPE ---------- */
+function renderTeam(){
+  const list = lilasGetTeam();
+  const box = $('teamGrid');
+  if(!list.length){ box.innerHTML = '<div class="empty" style="grid-column:1/-1;">' + svgIco(ICONS.user) + 'Aucun praticien enregistré. Ajoutez votre collectif pour l\'afficher sur l\'accueil.</div>'; return; }
+  const services = lilasGetServices();
+  box.innerHTML = list.map(t=>{
+    const svc = services.find(s=> s.id === t.serviceId);
+    return '<div class="team-card">' +
+      '<div class="tc-top"><div class="team-av">' + esc(lilasInitials(t.name)) + '</div>' +
+      '<div><h3>' + esc(t.name) + '</h3><div class="tc-role">' + esc(t.role || '') + '</div></div></div>' +
+      '<p class="tc-bio">' + esc(t.bio || '') + '</p>' +
+      '<div class="tc-meta"><span>' + esc(t.room || '') + (svc ? ' · ' + esc(svc.eyebrow || svc.title) : '') + '</span>' +
+      '<div class="row-actions">' +
+        '<button class="icon-btn" data-tedit="' + esc(t.id) + '" title="Modifier">' + svgIco(ICONS.edit) + '</button>' +
+        '<button class="icon-btn bad" data-tdel="' + esc(t.id) + '" title="Supprimer">' + svgIco(ICONS.trash) + '</button>' +
+      '</div></div></div>';
+  }).join('');
+  box.querySelectorAll('[data-tedit]').forEach(b=> b.addEventListener('click', ()=> openTeamModal(b.dataset.tedit)));
+  box.querySelectorAll('[data-tdel]').forEach(b=> b.addEventListener('click', ()=>{
+    const t = list.find(x=> x.id === b.dataset.tdel);
+    if(!t || !confirm('Retirer ' + t.name + ' de l\'équipe ?')) return;
+    lilasSetTeam(list.filter(x=> x.id !== b.dataset.tdel));
+    lilasAddActivity('Praticien retiré de l\'équipe : ' + t.name, 'team');
+    toast('Praticien supprimé.', ICONS.trash);
+    renderAll();
+  }));
+}
+
+let editingTeam = null;
+function openTeamModal(id){
+  editingTeam = id || null;
+  fillServiceSelects();
+  const t = id ? lilasGetTeam().find(x=> x.id === id) : null;
+  $('teamModalTitle').textContent = t ? 'Modifier le praticien' : 'Ajouter un praticien';
+  $('tName').value = t ? t.name : '';
+  $('tRole').value = t ? (t.role || '') : '';
+  $('tGroup').value = t ? (t.group || 'consultation') : 'consultation';
+  $('tService').value = t ? (t.serviceId || '') : '';
+  $('tRoom').value = t ? (t.room || '') : '';
+  $('tBio').value = t ? (t.bio || '') : '';
+  $('teamModal').classList.add('open');
+  $('tName').focus();
+}
+$('newTeamBtn').addEventListener('click', ()=> openTeamModal(null));
+$('teamCancel').addEventListener('click', ()=> $('teamModal').classList.remove('open'));
+$('teamModal').addEventListener('click', e=>{ if(e.target === $('teamModal')) $('teamModal').classList.remove('open'); });
+$('teamSave').addEventListener('click', ()=>{
+  const name = $('tName').value.trim();
+  if(name.length < 2){ toast('Indiquez le nom du praticien.'); $('tName').focus(); return; }
+  const data = {
+    name, role: $('tRole').value.trim(), group: $('tGroup').value,
+    serviceId: $('tService').value, room: $('tRoom').value.trim(), bio: $('tBio').value.trim()
+  };
+  const list = lilasGetTeam();
+  if(editingTeam){
+    const t = list.find(x=> x.id === editingTeam);
+    Object.assign(t, data);
+    lilasAddActivity('Praticien mis à jour : ' + name, 'team');
+    toast('Praticien modifié.');
+  } else {
+    list.push(Object.assign({ id: lilasUid('t') }, data));
+    lilasAddActivity('Nouveau praticien ajouté : ' + name, 'team');
+    toast('Praticien ajouté à l\'équipe.');
+  }
+  lilasSetTeam(list);
+  $('teamModal').classList.remove('open');
+  renderAll();
+});
+
+/* ---------- SPÉCIALITÉS ---------- */
+function renderServices(){
+  const services = lilasGetServices();
+  const box = $('servicesList');
+  if(!services.length){ box.innerHTML = '<div class="empty">' + svgIco(ICONS.svc) + 'Aucune spécialité. Ajoutez-en une pour qu\'elle apparaisse sur le site.</div>'; return; }
+  const GROUP_LABEL = { consultation:'Consultation', imagerie:'Imagerie', laboratoire:'Laboratoire' };
+  box.innerHTML = services.map(s=>
+    '<div class="svc-row">' +
+      '<div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">' + (s.icon || DEFAULT_ICON) + '</svg></div>' +
+      '<div><h3>' + esc(s.title) + '</h3><div class="tag">' + esc(s.tag || '') + ' · ' + esc(GROUP_LABEL[lilasGroupOf(s)] || '') + '</div>' +
+      '<div class="desc">' + esc(s.desc || '') + '</div></div>' +
+      '<div class="row-actions">' +
+        '<button class="icon-btn" data-edit="' + esc(s.id) + '" title="Modifier">' + svgIco(ICONS.edit) + '</button>' +
+        '<button class="icon-btn bad" data-del="' + esc(s.id) + '" title="Supprimer">' + svgIco(ICONS.trash) + '</button>' +
+      '</div></div>'
+  ).join('');
+  box.querySelectorAll('[data-edit]').forEach(b=> b.addEventListener('click', ()=> openServiceModal(b.dataset.edit)));
+  box.querySelectorAll('[data-del]').forEach(b=> b.addEventListener('click', ()=>{
+    if(!confirm('Supprimer cette spécialité ? Elle disparaîtra du site public.')) return;
+    const s = lilasGetServices().find(x=> x.id === b.dataset.del);
+    lilasSetServices(lilasGetServices().filter(x=> x.id !== b.dataset.del));
+    lilasAddActivity('Spécialité supprimée : ' + (s ? s.title : ''), 'svc');
+    toast('Spécialité supprimée.', ICONS.trash);
+    renderAll();
+  }));
+}
+
+let editingServiceId = null;
+function openServiceModal(id){
+  editingServiceId = id || null;
+  const s = id ? lilasGetServices().find(x=> x.id === id) : null;
+  $('svcModalTitle').textContent = s ? 'Modifier la spécialité' : 'Ajouter une spécialité';
+  $('svcTitle').value = s ? s.title : '';
+  $('svcTag').value = s ? (s.tag || '') : '';
+  $('svcEyebrow').value = s ? (s.eyebrow || '') : '';
+  $('svcDesc').value = s ? (s.desc || '') : '';
+  $('svcIcon').value = s ? (s.icon || '') : '';
+  $('svcGroup').value = s ? lilasGroupOf(s) : 'consultation';
+  $('svcModal').classList.add('open');
+  $('svcTitle').focus();
+}
+$('addServiceBtn').addEventListener('click', ()=> openServiceModal(null));
+$('svcCancelBtn').addEventListener('click', ()=> $('svcModal').classList.remove('open'));
+$('svcModal').addEventListener('click', e=>{ if(e.target === $('svcModal')) $('svcModal').classList.remove('open'); });
+$('svcSaveBtn').addEventListener('click', ()=>{
+  if(!$('svcTitle').value.trim()){ $('svcTitle').focus(); return; }
+  const services = lilasGetServices();
+  const data = {
+    title: $('svcTitle').value.trim(), tag: $('svcTag').value.trim(), eyebrow: $('svcEyebrow').value.trim(),
+    desc: $('svcDesc').value.trim(), icon: $('svcIcon').value.trim(), group: $('svcGroup').value
+  };
+  if(editingServiceId){
+    const s = services.find(x=> x.id === editingServiceId);
+    Object.assign(s, data);
+    lilasAddActivity('Spécialité mise à jour : ' + data.title, 'svc');
+    toast('Spécialité modifiée.');
+  } else {
+    services.push(Object.assign({ id: lilasUid('s') }, data));
+    lilasAddActivity('Nouvelle spécialité ajoutée : ' + data.title, 'svc');
+    toast('Spécialité ajoutée au site.');
+  }
+  lilasSetServices(services);
+  $('svcModal').classList.remove('open');
+  renderAll();
+});
+
+/* ---------- TEXTES & VITRINE ---------- */
+let draftStats = [], draftRevs = [], draftFaqs = [];
+function renderContent(){
+  const st = lilasGetSettings();
+  $('annEnabled').checked = st.announcement.enabled !== false;
+  $('annText').value = st.announcement.text || '';
+  $('hEyebrow').value = st.hero.eyebrow || '';
+  $('hTitle').value = st.hero.title || '';
+  $('hTitleEm').value = st.hero.titleEm || '';
+  $('hLede').value = st.hero.lede || '';
+  draftStats = JSON.parse(JSON.stringify(st.hero.stats || []));
+  draftRevs = JSON.parse(JSON.stringify(st.testimonials || []));
+  draftFaqs = JSON.parse(JSON.stringify(st.faq || []));
+  renderStatRows(); renderRevRows(); renderFaqRows(); paintPreview();
+}
+function paintPreview(){
+  $('pvEyebrow').textContent = $('hEyebrow').value;
+  $('pvTitle').innerHTML = esc($('hTitle').value) + ' <em>' + esc($('hTitleEm').value) + '</em>';
+  $('pvLede').textContent = $('hLede').value;
+}
+['hEyebrow','hTitle','hTitleEm','hLede'].forEach(id=> $(id).addEventListener('input', paintPreview));
+
+function renderStatRows(){
+  const box = $('statRows');
+  if(!draftStats.length){ box.innerHTML = '<p style="font-size:.82rem;color:var(--ink-soft);">Aucune statistique.</p>'; return; }
+  box.innerHTML = draftStats.map((s, i)=>
+    '<div class="stat-edit">' +
+      '<div class="field" style="margin-bottom:0;"><label>Chiffre</label><input data-sv="' + i + '" value="' + esc(s.v) + '" placeholder="48h"></div>' +
+      '<div class="field" style="margin-bottom:0;"><label>Légende</label><input data-sl="' + i + '" value="' + esc(s.l) + '" placeholder="délai moyen des résultats"></div>' +
+      '<button class="icon-btn bad" data-sdel="' + i + '" title="Retirer">' + svgIco(ICONS.trash) + '</button>' +
+    '</div>'
+  ).join('');
+  box.querySelectorAll('[data-sv]').forEach(inp=> inp.addEventListener('input', ()=> draftStats[+inp.dataset.sv].v = inp.value));
+  box.querySelectorAll('[data-sl]').forEach(inp=> inp.addEventListener('input', ()=> draftStats[+inp.dataset.sl].l = inp.value));
+  box.querySelectorAll('[data-sdel]').forEach(b=> b.addEventListener('click', ()=>{ draftStats.splice(+b.dataset.sdel, 1); renderStatRows(); }));
+}
+$('addStat').addEventListener('click', ()=>{
+  if(draftStats.length >= 4){ toast('Trois statistiques suffisent sur l\'accueil.'); return; }
+  draftStats.push({ v:'', l:'' });
+  renderStatRows();
+});
+
+function renderRevRows(){
+  const box = $('revRows');
+  if(!draftRevs.length){ box.innerHTML = '<p style="font-size:.82rem;color:var(--ink-soft);">Aucun avis patient.</p>'; return; }
+  box.innerHTML = draftRevs.map((r, i)=>
+    '<div class="rev-edit">' +
+      '<div class="field" style="margin-bottom:0;"><label>Patient</label><input data-rn="' + i + '" value="' + esc(r.name) + '" placeholder="Samira B."></div>' +
+      '<div class="field" style="margin-bottom:0;"><label>Témoignage</label><input data-rt="' + i + '" value="' + esc(r.text) + '" placeholder="Votre avis…"></div>' +
+      '<div class="field" style="margin-bottom:0;"><label>Thème</label><input data-rg="' + i + '" value="' + esc(r.tag || '') + '" placeholder="Cardiologie"></div>' +
+      '<button class="icon-btn bad" data-rdel="' + i + '" title="Retirer">' + svgIco(ICONS.trash) + '</button>' +
+    '</div>'
+  ).join('');
+  box.querySelectorAll('[data-rn]').forEach(inp=> inp.addEventListener('input', ()=> draftRevs[+inp.dataset.rn].name = inp.value));
+  box.querySelectorAll('[data-rt]').forEach(inp=> inp.addEventListener('input', ()=> draftRevs[+inp.dataset.rt].text = inp.value));
+  box.querySelectorAll('[data-rg]').forEach(inp=> inp.addEventListener('input', ()=> draftRevs[+inp.dataset.rg].tag = inp.value));
+  box.querySelectorAll('[data-rdel]').forEach(b=> b.addEventListener('click', ()=>{ draftRevs.splice(+b.dataset.rdel, 1); renderRevRows(); }));
+}
+$('addRev').addEventListener('click', ()=>{
+  if(draftRevs.length >= 6){ toast('Six avis maximum sur l\'accueil.'); return; }
+  draftRevs.push({ name:'', text:'', tag:'' });
+  renderRevRows();
+});
+
+function renderFaqRows(){
+  const box = $('faqRows');
+  if(!draftFaqs.length){ box.innerHTML = '<p style="font-size:.82rem;color:var(--ink-soft);">Aucune question fréquente.</p>'; return; }
+  box.innerHTML = draftFaqs.map((f, i)=>
+    '<div class="faq-edit">' +
+      '<div class="field"><label>Question</label><input data-fq="' + i + '" value="' + esc(f.q) + '" placeholder="Faut-il une ordonnance ?"></div>' +
+      '<div class="field" style="margin-bottom:6px;"><label>Réponse</label><textarea data-fa="' + i + '" rows="2">' + esc(f.a) + '</textarea></div>' +
+      '<button class="icon-btn bad" data-fdel="' + i + '" title="Supprimer">' + svgIco(ICONS.trash) + '</button>' +
+    '</div>'
+  ).join('');
+  box.querySelectorAll('[data-fq]').forEach(inp=> inp.addEventListener('input', ()=> draftFaqs[+inp.dataset.fq].q = inp.value));
+  box.querySelectorAll('[data-fa]').forEach(inp=> inp.addEventListener('input', ()=> draftFaqs[+inp.dataset.fa].a = inp.value));
+  box.querySelectorAll('[data-fdel]').forEach(b=> b.addEventListener('click', ()=>{ draftFaqs.splice(+b.dataset.fdel, 1); renderFaqRows(); }));
+}
+$('addFaq').addEventListener('click', ()=>{
+  if(draftFaqs.length >= 10){ toast('Dix questions maximum.'); return; }
+  draftFaqs.push({ q:'', a:'' });
+  renderFaqRows();
+});
+
+$('saveContent').addEventListener('click', ()=>{
+  const st = lilasGetSettings();
+  st.announcement.enabled = $('annEnabled').checked;
+  st.announcement.text = $('annText').value.trim();
+  st.hero.eyebrow = $('hEyebrow').value.trim();
+  st.hero.title = $('hTitle').value.trim();
+  st.hero.titleEm = $('hTitleEm').value.trim();
+  st.hero.lede = $('hLede').value.trim();
+  st.hero.stats = draftStats.filter(s=> s.v || s.l).slice(0, 3);
+  st.testimonials = draftRevs.filter(r=> r.name || r.text);
+  st.faq = draftFaqs.filter(f=> f.q);
+  lilasSetSettings(st);
+  lilasAddActivity('Textes du site public mis à jour (accueil, avis, FAQ)', 'settings');
+  $('contentNote').textContent = 'Textes enregistrés — le site public est à jour ✓';
+  toast('Textes enregistrés. Actualisez le site public pour voir les changements.');
+  setTimeout(()=>{ $('contentNote').textContent = ''; }, 3200);
+  renderBadges();
+});
+
+/* ---------- MESSAGES ---------- */
+function renderMessages(){
+  const q = $('mSearch').value.trim().toLowerCase();
+  const f = $('mFilter').value;
+  let list = lilasGetMessages();
+  if(f === 'unread') list = list.filter(m=> !m.read);
+  if(f === 'assistant') list = list.filter(m=> m.source === 'assistant' || m.source === 'ia');
+  if(f === 'form') list = list.filter(m=> !m.source || m.source === 'form');
+  if(q) list = list.filter(m=> [m.name, m.phone, m.message, m.service].join(' ').toLowerCase().includes(q));
+
+  const box = $('messagesList');
+  if(!list.length){
+    box.innerHTML = '<div class="empty">' + svgIco(ICONS.msg) + 'Aucun message pour ces critères.<br>Les demandes envoyées depuis le site apparaîtront ici en temps réel.</div>';
+    return;
+  }
+  box.innerHTML = list.map(m=>{
+    const d = new Date(m.date);
+    const ia = (m.source === 'assistant' || m.source === 'ia');
+    return '<div class="msg-card' + (m.read ? '' : ' unread') + '">' +
+      '<div>' +
+        '<div class="msg-top"><b>' + esc(m.name || 'Sans nom') + '</b>' +
+          (ia ? '<span class="badge-ia">Orientation assistant</span>' : '<span class="badge">Formulaire</span>') +
+          (m.read ? '' : '<span class="badge" style="background:#FFF2DC;color:#8A5A12;">Nouveau</span>') +
+        '</div>' +
+        '<div class="msg-meta">' + esc(m.phone || '—') + ' · ' + esc(m.service || 'Consultation générale') + '</div>' +
+        '<div class="msg-text' + (ia ? ' ia-brief' : '') + '">' + esc(m.message || '(pas de message)') + '</div>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;">' +
+        '<span class="msg-date">' + d.toLocaleDateString('fr-FR', {day:'numeric', month:'short'}) + ' · ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) + '</span>' +
+        '<div class="row-actions">' +
+          (m.read ? '' : '<button class="icon-btn ok" data-read="' + esc(m.id) + '" title="Marquer comme lu">' + svgIco(ICONS.check) + '</button>') +
+          '<a class="icon-btn" href="tel:' + esc(String(m.phone || '').replace(/\s+/g, '')) + '" title="Appeler">' + svgIco(ICONS.phone) + '</a>' +
+          '<button class="icon-btn bad" data-mdel="' + esc(m.id) + '" title="Supprimer">' + svgIco(ICONS.trash) + '</button>' +
+        '</div>' +
+      '</div></div>';
+  }).join('');
+  box.querySelectorAll('[data-read]').forEach(b=> b.addEventListener('click', ()=>{
+    const list2 = lilasGetMessages();
+    const m = list2.find(x=> x.id === b.dataset.read);
+    if(m) m.read = true;
+    lilasSetMessages(list2);
+    renderMessages(); renderBadges();
+  }));
+  box.querySelectorAll('[data-mdel]').forEach(b=> b.addEventListener('click', ()=>{
+    if(!confirm('Supprimer ce message ?')) return;
+    lilasSetMessages(lilasGetMessages().filter(x=> x.id !== b.dataset.mdel));
+    renderMessages(); renderBadges();
+  }));
+}
+$('mSearch').addEventListener('input', renderMessages);
+$('mFilter').addEventListener('change', renderMessages);
+$('readAllBtn').addEventListener('click', ()=>{
+  const list = lilasGetMessages().map(m=> Object.assign({}, m, { read:true }));
+  lilasSetMessages(list);
+  lilasAddActivity('Tous les messages marqués comme lus', 'msg');
+  renderMessages(); renderBadges();
+  toast('Tous les messages sont marqués comme lus.');
+});
+$('clearMsgsBtn').addEventListener('click', ()=>{
+  if(!confirm('Effacer définitivement tous les messages reçus ?')) return;
+  lilasSetMessages([]);
+  lilasAddActivity('Boîte de messages vidée', 'msg');
+  renderMessages(); renderBadges();
+  toast('Messages effacés.', ICONS.trash);
+});
+$('exportMsgs').addEventListener('click', ()=>{
+  const rows = [['Date','Nom','Telephone','Service','Source','Lu','Message']];
+  lilasGetMessages().forEach(m=> rows.push([
+    m.date, m.name || '', m.phone || '', m.service || '', m.source || 'form', m.read ? 'oui' : 'non', m.message || ''
+  ]));
+  lilasDownload('les-lilas-messages-' + lilasToday() + '.csv', lilasToCsv(rows));
+  toast('Messages exportés en CSV.');
+});
+
+/* ---------- SAUVEGARDE ---------- */
+$('exportAll').addEventListener('click', ()=>{
+  lilasDownload('les-lilas-sauvegarde-' + lilasToday() + '.json', lilasBackupAll(), 'application/json');
+  lilasAddActivity('Sauvegarde complète exportée', 'settings');
+  $('backupNote').textContent = 'Sauvegarde téléchargée ✓';
+  toast('Sauvegarde téléchargée.');
+});
+$('importFile').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  if(!confirm('Remplacer toutes les données actuelles par ce fichier ?')){ e.target.value = ''; return; }
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      lilasRestoreAll(reader.result);
+      lilasAddActivity('Sauvegarde restaurée depuis un fichier', 'settings');
+      toast('Données restaurées.');
+      renderAll();
+    }catch(err){ alert('Fichier invalide : ' + err.message); }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+});
+$('wipeDemo').addEventListener('click', ()=>{
+  if(!confirm('Vider tous les rendez-vous et tous les messages ? Cette action est irréversible.')) return;
+  lilasSetAppointments([]);
+  lilasSetMessages([]);
+  lilasAddActivity('Rendez-vous et messages vidés (remise à zéro)', 'settings');
+  toast('Rendez-vous et messages vidés.', ICONS.trash);
+  renderAll();
+});
+$('resetSettings').addEventListener('click', ()=>{
+  if(!confirm('Rétablir les textes, horaires, avis et FAQ d\'origine ?')) return;
+  lilasResetSettings();
+  lilasAddActivity('Textes et horaires rétablis aux valeurs d\'origine', 'settings');
+  toast('Valeurs d\'origine restaurées.');
+  renderAll();
+});
+
+/* ---------- boot ---------- */
+function renderAll(){
+  renderBadges();
+  renderDashboard();
+  renderAppointments();
+  renderHours();
+  renderTeam();
+  renderServices();
+  renderContent();
+  renderMessages();
+}
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Escape'){
+    document.querySelectorAll('.modal-overlay.open').forEach(m=> m.classList.remove('open'));
+  }
+});
+try{ if(sessionStorage.getItem('lilas_admin_auth') === '1') unlock(); }catch(e){}
+</script>
+</body>
+</html>

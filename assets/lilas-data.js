@@ -6,8 +6,8 @@
 
    >>> SET THESE TWO VALUES (Supabase > Project Settings > API) <<<
    ========================================================== */
-const LILAS_SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
-const LILAS_SUPABASE_KEY = 'YOUR-ANON-PUBLIC-KEY';   /* the "anon / public" key — safe to expose */
+const LILAS_SUPABASE_URL = 'https://yikzsruyhcreuosidtmq.supabase.co';
+const LILAS_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlpa3pzcnV5aGNyZXVvc2lkdG1xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2Mzc1MTQsImV4cCI6MjEwODIxMzUxNH0.VnruVrLCYM5SDiHyvU4LQg0c5yJRtmnNIJMQubA8zMM';   /* the "anon / public" key — safe to expose */
 
 
 const LILAS_KEYS = {

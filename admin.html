@@ -397,14 +397,18 @@
         <circle cx="21" cy="39" r="14" fill="#8B2C6B"/><circle cx="39" cy="39" r="14" fill="#F3B8D4"/>
       </svg>
       <h1>Administration</h1>
-      <p>Espace réservé à l'équipe de la clinique. Saisissez le mot de passe pour gérer le site public.</p>
+      <p>Espace réservé à l'équipe de la clinique. Connectez-vous pour gérer le site public.</p>
       <div class="gate-field">
+        <label for="gateEmail">Adresse e-mail</label>
+        <input id="gateEmail" type="email" placeholder="admin@exemple.com" autocomplete="username">
+      </div>
+      <div class="gate-field" style="margin-top:14px;">
         <label for="gatePwd">Mot de passe</label>
-        <input id="gatePwd" type="password" placeholder="••••••••" autocomplete="off">
+        <input id="gatePwd" type="password" placeholder="••••••••" autocomplete="current-password">
       </div>
       <button class="gate-btn" id="gateBtn" type="button">Se connecter</button>
       <div class="gate-err" id="gateErr"></div>
-      <p class="gate-note">Mot de passe par défaut : <b>lilas2026</b> — pensez à le changer dans le fichier admin.html avant publication. La protection est locale (site statique, sans serveur) : elle évite les erreurs accidentelles mais ne remplace pas une authentification serveur pour un usage public sensible.</p>
+      <p class="gate-note">Connexion sécurisée : le compte administrateur est géré dans Supabase (Authentication). Les modifications sont enregistrées en ligne et visibles immédiatement par tous les visiteurs.</p>
     </div>
   </div>
 </div>
@@ -800,7 +804,7 @@
           <div class="panel-head">
             <div>
               <h2>Sauvegarde &amp; maintenance</h2>
-              <p>Toutes les données vivent dans le navigateur (localStorage). Exportez-les régulièrement pour les conserver ou les transférer vers un autre poste.</p>
+              <p>Les données sont enregistrées en ligne (Supabase) et partagées avec le site public. Exportez-les régulièrement pour en garder une copie de sécurité.</p>
             </div>
           </div>
 
@@ -915,7 +919,6 @@
    Partie 1 : auth, navigation, tableau de bord
    ========================================================== */
 const DEFAULT_ICON = '<path d="M12 21c-4.4-2.9-8-6.9-8-11a8 8 0 0 1 16 0c0 4.1-3.6 8.1-8 11Z"/><circle cx="12" cy="10" r="2.6"/>';
-const ADMIN_PASSWORD = 'lilas2026'; // changez ce mot de passe avant publication
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -950,22 +953,34 @@ const gate = $('gate'), app = $('app');
 function unlock(){
   gate.style.display = 'none';
   app.classList.add('show');
-  try{ sessionStorage.setItem('lilas_admin_auth','1'); }catch(e){}
   renderAll();
 }
 (function initGate(){
-  $('gK1').textContent = lilasGetAppointments().length;
+  $('gK1').textContent = '—';
   $('gK2').textContent = lilasGetServices().length;
   $('gK3').textContent = lilasGetTeam().length;
   const go = ()=>{
-    if($('gatePwd').value === ADMIN_PASSWORD){ unlock(); }
-    else{ $('gateErr').textContent = 'Mot de passe incorrect.'; $('gatePwd').value=''; $('gatePwd').focus(); }
+    const email = $('gateEmail').value.trim(), pwd = $('gatePwd').value;
+    if(!email || !pwd){ $('gateErr').textContent = 'Saisissez votre e-mail et votre mot de passe.'; return; }
+    $('gateBtn').disabled = true; $('gateErr').textContent = '';
+    lilasLogin(email, pwd).then(()=>{ $('gateBtn').disabled = false; unlock(); })
+      .catch(err=>{
+        $('gateBtn').disabled = false;
+        $('gateErr').textContent = err.message || 'Connexion impossible.';
+        $('gatePwd').value=''; $('gatePwd').focus();
+      });
   };
   $('gateBtn').addEventListener('click', go);
   $('gatePwd').addEventListener('keydown', e=>{ if(e.key === 'Enter') go(); });
-  $('logoutBtn').addEventListener('click', ()=>{ try{ sessionStorage.removeItem('lilas_admin_auth'); }catch(e){} location.reload(); });
-  $('gatePwd').focus();
+  $('gateEmail').addEventListener('keydown', e=>{ if(e.key === 'Enter') go(); });
+  $('logoutBtn').addEventListener('click', ()=>{ lilasLogout(); location.reload(); });
+  $('gateEmail').focus();
 })();
+
+/* background save failures (network, expired session…) */
+window.addEventListener('lilas:syncerror', e=>{
+  toast('Échec de l\'enregistrement en ligne : ' + (e.detail || 'erreur inconnue'), ICONS.x);
+});
 
 /* ---------- tabs ---------- */
 const TAB_TITLES = {
@@ -1917,7 +1932,7 @@ document.addEventListener('keydown', e=>{
     document.querySelectorAll('.modal-overlay.open').forEach(m=> m.classList.remove('open'));
   }
 });
-try{ if(sessionStorage.getItem('lilas_admin_auth') === '1') unlock(); }catch(e){}
+if(lilasIsAdmin()) unlock();
 </script>
 </body>
 </html>

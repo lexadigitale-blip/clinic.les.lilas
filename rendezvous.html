@@ -505,6 +505,7 @@
     }
 
     const btn = $('bkSubmit');
+    const btnHtml = btn.innerHTML;
     btn.disabled = true;
     btn.textContent = 'Enregistrement…';
 
@@ -514,6 +515,15 @@
         service: state.service, team: state.team, note: note, reminder: reminder,
         status: 'nouveau', source: 'site'
       });
+      if(appt.saveError){
+        err.textContent = appt.saveError === 'config'
+          ? 'La réservation en ligne n\'est pas encore configurée. Appelez l\'accueil pour prendre rendez-vous.'
+          : 'Impossible d\'enregistrer votre rendez-vous (connexion). Réessayez dans un instant ou appelez l\'accueil.';
+        err.classList.add('show');
+        btn.disabled = false;
+        btn.innerHTML = btnHtml;
+        return;
+      }
       lilasAddMessage({
         name: name, phone: phone, service: state.service,
         message: 'Réservation en ligne ' + appt.ref + ' — ' + lilasDateLabel(state.date) + ' à ' + state.time + '.' + (note ? ' Motif : ' + note : ''),

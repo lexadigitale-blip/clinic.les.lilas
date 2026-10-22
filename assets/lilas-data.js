@@ -1,12 +1,14 @@
 /* ==========================================================
-   Clinique Les Lilas — shared data layer
+   Clinique Les Lilas — shared data layer (Supabase)
    Used by BOTH the public site (index, services, assistant,
-   rendezvous) and admin.html (admin panel). Everything is
-   stored in the browser's localStorage, so the admin and the
-   public site must be served from the SAME origin to share
-   data (same domain, or both through a local server like
-   `python3 -m http.server`).
+   rendezvous) and admin.html. Data lives in Supabase, so edits
+   made in the admin are visible to every visitor.
+
+   >>> SET THESE TWO VALUES (Supabase > Project Settings > API) <<<
    ========================================================== */
+const LILAS_SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+const LILAS_SUPABASE_KEY = 'YOUR-ANON-PUBLIC-KEY';   /* the "anon / public" key — safe to expose */
+
 
 const LILAS_KEYS = {
   services:    'lilas_services',
@@ -130,21 +132,157 @@ const LILAS_DEFAULT_SETTINGS = {
   ]
 };
 
-/* ================= generic storage ================= */
+/* ================= Supabase transport ================= */
+const LILAS_SB_OK = LILAS_SUPABASE_URL.indexOf('YOUR-') < 0 && LILAS_SUPABASE_KEY.indexOf('YOUR-') < 0;
+const LILAS_SESSION_KEY = 'lilas_sb_session';
+const LILAS_CACHE = { kv:{}, appointments:[], messages:[], activity:[], found:{} };
+
 function lilasClone(v){ return JSON.parse(JSON.stringify(v)); }
-function lilasLoad(key, fallback){
+function lilasUid(prefix){ return prefix + Date.now().toString(36) + Math.random().toString(16).slice(2,6); }
+
+function lilasSession(){
+  try{ return JSON.parse(sessionStorage.getItem(LILAS_SESSION_KEY) || 'null'); }catch(e){ return null; }
+}
+function lilasSetSession(s){
+  try{ if(s) sessionStorage.setItem(LILAS_SESSION_KEY, JSON.stringify(s)); else sessionStorage.removeItem(LILAS_SESSION_KEY); }catch(e){}
+}
+function lilasIsAdmin(){ const s = lilasSession(); return !!(s && s.access_token); }
+function lilasStoreAuth(j){
+  lilasSetSession({ access_token:j.access_token, refresh_token:j.refresh_token,
+    expires_at: Math.floor(Date.now()/1000) + (j.expires_in || 3600) });
+}
+
+/* synchronous request (used for the initial page load + small patient actions) */
+function lilasSyncReq(method, path, body, extra){
+  if(!LILAS_SB_OK) return { ok:false, status:0, data:null };
+  lilasEnsureToken();
+  const s = lilasSession();
+  const x = new XMLHttpRequest();
+  x.open(method, LILAS_SUPABASE_URL + path, false);
+  x.setRequestHeader('apikey', LILAS_SUPABASE_KEY);
+  x.setRequestHeader('Authorization', 'Bearer ' + (s && s.access_token ? s.access_token : LILAS_SUPABASE_KEY));
+  x.setRequestHeader('Content-Type', 'application/json');
+  Object.keys(extra || {}).forEach(k => x.setRequestHeader(k, extra[k]));
+  try{ x.send(body === undefined ? null : JSON.stringify(body)); }
+  catch(e){ return { ok:false, status:0, data:null }; }
+  let data = null;
+  try{ data = x.responseText ? JSON.parse(x.responseText) : null; }catch(e){}
+  return { ok: x.status >= 200 && x.status < 300, status: x.status, data: data };
+}
+
+/* refresh the admin token shortly before it expires */
+function lilasEnsureToken(){
+  const s = lilasSession();
+  if(!s || !s.refresh_token || s.expires_at - 60 > Date.now()/1000) return;
+  const x = new XMLHttpRequest();
+  x.open('POST', LILAS_SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', false);
+  x.setRequestHeader('apikey', LILAS_SUPABASE_KEY);
+  x.setRequestHeader('Content-Type', 'application/json');
   try{
-    const raw = localStorage.getItem(key);
-    if(!raw) return lilasClone(fallback);
-    const parsed = JSON.parse(raw);
-    if(parsed === null || parsed === undefined) return lilasClone(fallback);
-    if(Array.isArray(fallback) && !Array.isArray(parsed)) return lilasClone(fallback);
-    return parsed;
-  }catch(e){ return lilasClone(fallback); }
+    x.send(JSON.stringify({ refresh_token: s.refresh_token }));
+    const j = JSON.parse(x.responseText);
+    if(x.status === 200 && j.access_token) lilasStoreAuth(j); else lilasSetSession(null);
+  }catch(e){ lilasSetSession(null); }
+}
+
+/* background writes, kept in order; failures are reported to the admin UI */
+let lilasQueue = Promise.resolve();
+function lilasAsyncReq(method, path, body, extra){
+  if(!LILAS_SB_OK) return lilasQueue;
+  lilasQueue = lilasQueue.then(() => {
+    lilasEnsureToken();
+    const s = lilasSession();
+    return fetch(LILAS_SUPABASE_URL + path, {
+      method: method,
+      headers: Object.assign({
+        'apikey': LILAS_SUPABASE_KEY,
+        'Authorization': 'Bearer ' + (s && s.access_token ? s.access_token : LILAS_SUPABASE_KEY),
+        'Content-Type': 'application/json'
+      }, extra || {}),
+      body: body === undefined ? undefined : JSON.stringify(body)
+    }).then(r => {
+      if(r.ok) return;
+      return r.text().then(t => { throw new Error('HTTP ' + r.status + ' ' + t.slice(0, 160)); });
+    });
+  }).catch(e => {
+    try{ window.dispatchEvent(new CustomEvent('lilas:syncerror', { detail: e.message })); }catch(_){}
+  });
+  return lilasQueue;
+}
+
+/* ---- admin sign-in / sign-out ---- */
+function lilasLogin(email, password){
+  if(!LILAS_SB_OK) return Promise.reject(new Error('Supabase n\'est pas configuré (voir assets/lilas-data.js).'));
+  return fetch(LILAS_SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+    method:'POST',
+    headers:{ 'apikey': LILAS_SUPABASE_KEY, 'Content-Type':'application/json' },
+    body: JSON.stringify({ email: email, password: password })
+  }).then(r => r.json().then(j => {
+    if(!r.ok || !j.access_token) throw new Error('Identifiants incorrects.');
+    lilasStoreAuth(j);
+    lilasLoadAll();
+    return true;
+  }));
+}
+function lilasLogout(){ lilasSetSession(null); }
+
+/* ---- load everything into memory (blocking, once per page load) ---- */
+function lilasRowToAppt(r){ return Object.assign({}, r.data, { id:r.id, ref:r.ref, date:r.date, time:r.time, status:r.status }); }
+function lilasLoadAll(){
+  if(!LILAS_SB_OK) return;
+  let r = lilasSyncReq('GET', '/rest/v1/lilas_kv?select=key,value');
+  if(r.ok && Array.isArray(r.data)){
+    LILAS_CACHE.kv = {};
+    r.data.forEach(row => { LILAS_CACHE.kv[row.key] = row.value; });
+  }
+  if(lilasIsAdmin()){
+    r = lilasSyncReq('GET', '/rest/v1/lilas_appointments?select=id,ref,date,time,status,data&order=date.desc,time.desc&limit=5000');
+    if(r.ok && Array.isArray(r.data)) LILAS_CACHE.appointments = r.data.map(lilasRowToAppt);
+    r = lilasSyncReq('GET', '/rest/v1/lilas_messages?select=id,data&order=created_at.desc&limit=2000');
+    if(r.ok && Array.isArray(r.data)) LILAS_CACHE.messages = r.data.map(x => Object.assign({}, x.data, { id:x.id }));
+    r = lilasSyncReq('GET', '/rest/v1/lilas_activity?select=id,data&order=created_at.desc&limit=120');
+    if(r.ok && Array.isArray(r.data)) LILAS_CACHE.activity = r.data.map(x => Object.assign({}, x.data, { id:x.id }));
+  }else{
+    /* visitors only get anonymous "taken slot" markers, never patient data */
+    r = lilasSyncReq('POST', '/rest/v1/rpc/lilas_taken_slots', {});
+    LILAS_CACHE.appointments = (r.ok && Array.isArray(r.data) ? r.data : [])
+      .map((s, i) => ({ id:'slot' + i, ref:'', date:s.date, time:s.time, status:'confirme', stub:true }));
+  }
+}
+lilasLoadAll();
+
+/* ---- helpers for list tables (diff → upsert / delete) ---- */
+function lilasSyncList(table, oldList, newList, toRow){
+  const oldMap = new Map(oldList.map(x => [x.id, JSON.stringify(x)]));
+  const newIds = new Set(newList.map(x => x.id));
+  const up  = newList.filter(x => oldMap.get(x.id) !== JSON.stringify(x));
+  const del = oldList.filter(x => !newIds.has(x.id)).map(x => x.id);
+  if(up.length){
+    lilasAsyncReq('POST', '/rest/v1/' + table + '?on_conflict=id', up.map(toRow),
+      { Prefer:'resolution=merge-duplicates,return=minimal' });
+  }
+  for(let i = 0; i < del.length; i += 50){
+    lilasAsyncReq('DELETE', '/rest/v1/' + table + '?id=in.(' + del.slice(i, i + 50).join(',') + ')');
+  }
+}
+function lilasApptRow(a){ return { id:a.id, ref:a.ref, date:a.date, time:a.time, status:a.status, data:a }; }
+function lilasMsgRow(m){ return { id:m.id, data:m, created_at:m.date || new Date().toISOString() }; }
+function lilasActRow(a){ return { id:a.id, data:a, created_at:a.date || new Date().toISOString() }; }
+
+/* ---- key/value content (services, contact, team, settings) ---- */
+function lilasLoad(key, fallback){
+  const v = LILAS_CACHE.kv[key];
+  if(v === null || v === undefined) return lilasClone(fallback);
+  if(Array.isArray(fallback) && !Array.isArray(v)) return lilasClone(fallback);
+  return lilasClone(v);
 }
 function lilasSave(key, val){
-  try{ localStorage.setItem(key, JSON.stringify(val)); return true; }
-  catch(e){ return false; }
+  if(!lilasIsAdmin()) return false;
+  LILAS_CACHE.kv[key] = lilasClone(val);
+  lilasAsyncReq('POST', '/rest/v1/lilas_kv?on_conflict=key',
+    { key:key, value:val, updated_at:new Date().toISOString() },
+    { Prefer:'resolution=merge-duplicates,return=minimal' });
+  return true;
 }
 
 /* ================= services ================= */
@@ -156,19 +294,23 @@ function lilasGetContact(){ return lilasLoad(LILAS_KEYS.contact, LILAS_DEFAULT_C
 function lilasSetContact(obj){ return lilasSave(LILAS_KEYS.contact, obj); }
 
 /* ================= messages ================= */
-function lilasGetMessages(){ return lilasLoad(LILAS_KEYS.messages, []); }
-function lilasSetMessages(list){ return lilasSave(LILAS_KEYS.messages, list); }
+function lilasGetMessages(){ return lilasClone(LILAS_CACHE.messages); }
+function lilasSetMessages(list){
+  if(!lilasIsAdmin()) return false;
+  lilasSyncList('lilas_messages', LILAS_CACHE.messages, list, lilasMsgRow);
+  LILAS_CACHE.messages = lilasClone(list);
+  return true;
+}
 function lilasAddMessage(msg){
-  const list = lilasGetMessages();
-  list.unshift(Object.assign({
+  const full = Object.assign({
     id: 'm' + Date.now() + Math.random().toString(16).slice(2),
     date: new Date().toISOString(),
     read: false
-  }, msg));
-  lilasSetMessages(list);
-  return list;
+  }, msg);
+  lilasAsyncReq('POST', '/rest/v1/lilas_messages', lilasMsgRow(full), { Prefer:'return=minimal' });
+  if(lilasIsAdmin()) LILAS_CACHE.messages.unshift(full);
+  return lilasGetMessages();
 }
-function lilasUid(prefix){ return prefix + Date.now().toString(36) + Math.random().toString(16).slice(2,6); }
 
 /* Pôle (consultation / imagerie / laboratoire) used to group services on the public site */
 const LILAS_GROUPS = { s1:'consultation', s2:'consultation', s3:'imagerie', s4:'consultation', s5:'consultation', s6:'imagerie', s7:'consultation', s8:'laboratoire' };
@@ -193,16 +335,25 @@ function lilasGetSettings(){
   return s;
 }
 function lilasSetSettings(obj){ return lilasSave(LILAS_KEYS.settings, obj); }
-function lilasResetSettings(){ try{ localStorage.removeItem(LILAS_KEYS.settings); }catch(e){} }
+function lilasResetSettings(){
+  if(!lilasIsAdmin()) return;
+  delete LILAS_CACHE.kv[LILAS_KEYS.settings];
+  lilasAsyncReq('DELETE', '/rest/v1/lilas_kv?key=eq.' + LILAS_KEYS.settings);
+}
 
 /* ================= activity journal (admin) ================= */
-function lilasGetActivity(){ return lilasLoad(LILAS_KEYS.activity, []); }
+function lilasGetActivity(){ return lilasClone(LILAS_CACHE.activity); }
 function lilasAddActivity(text, kind){
-  const list = lilasGetActivity();
-  list.unshift({ id: lilasUid('a'), date: new Date().toISOString(), text: String(text||''), kind: kind||'info' });
-  lilasSave(LILAS_KEYS.activity, list.slice(0, 120));
+  const entry = { id: lilasUid('a'), date: new Date().toISOString(), text: String(text||''), kind: kind||'info' };
+  lilasAsyncReq('POST', '/rest/v1/lilas_activity', lilasActRow(entry), { Prefer:'return=minimal' });
+  if(lilasIsAdmin()) LILAS_CACHE.activity = [entry].concat(LILAS_CACHE.activity).slice(0, 120);
 }
-function lilasClearActivity(){ return lilasSave(LILAS_KEYS.activity, []); }
+function lilasClearActivity(){
+  if(!lilasIsAdmin()) return false;
+  LILAS_CACHE.activity = [];
+  lilasAsyncReq('DELETE', '/rest/v1/lilas_activity?id=not.is.null');
+  return true;
+}
 
 /* ================= dates ================= */
 function lilasYmd(d){
@@ -235,8 +386,13 @@ function lilasDateLabel(ymd){
 }
 
 /* ================= appointments ================= */
-function lilasGetAppointments(){ return lilasLoad(LILAS_KEYS.appointments, []); }
-function lilasSetAppointments(list){ return lilasSave(LILAS_KEYS.appointments, list); }
+function lilasGetAppointments(){ return lilasClone(LILAS_CACHE.appointments); }
+function lilasSetAppointments(list){
+  if(!lilasIsAdmin()) return false;
+  lilasSyncList('lilas_appointments', LILAS_CACHE.appointments, list, lilasApptRow);
+  LILAS_CACHE.appointments = lilasClone(list);
+  return true;
+}
 function lilasRefCode(){
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let out = '';
@@ -244,18 +400,24 @@ function lilasRefCode(){
   return 'LL-' + out;
 }
 function lilasNewRef(){
-  const list = lilasGetAppointments().map(a=>a.ref);
+  const list = LILAS_CACHE.appointments.map(a=>a.ref);
   let ref = lilasRefCode();
   let guard = 0;
   while(list.includes(ref) && guard++ < 40) ref = lilasRefCode();
   return ref;
 }
+/* Patient follow-up: visitors look up one appointment by code (server-side); the admin reads its own list. */
 function lilasFindAppointment(ref){
   const r = String(ref||'').trim().toUpperCase();
-  return lilasGetAppointments().find(a => a.ref.toUpperCase() === r) || null;
+  if(!r) return null;
+  if(lilasIsAdmin()) return LILAS_CACHE.appointments.find(a => String(a.ref).toUpperCase() === r) || null;
+  const res = lilasSyncReq('POST', '/rest/v1/rpc/lilas_find_appointment', { p_ref: r });
+  if(!res.ok || !res.data) return null;
+  LILAS_CACHE.found[res.data.id] = res.data;
+  return lilasClone(res.data);
 }
+/* Saves the booking on the server. On failure the returned object has `saveError` set. */
 function lilasAddAppointment(appt){
-  const list = lilasGetAppointments();
   const full = Object.assign({
     id: lilasUid('rdv'),
     ref: lilasNewRef(),
@@ -270,20 +432,40 @@ function lilasAddAppointment(appt){
     source: 'site',
     createdAt: new Date().toISOString()
   }, appt);
-  list.unshift(full);
-  lilasSetAppointments(list);
+  if(!LILAS_SB_OK){ full.saveError = 'config'; return full; }
+  let ok = false;
+  for(let i = 0; i < 6 && !ok; i++){
+    const res = lilasSyncReq('POST', '/rest/v1/lilas_appointments', lilasApptRow(full), { Prefer:'return=minimal' });
+    if(res.ok) ok = true;
+    else if(res.status === 409) full.ref = lilasRefCode();   /* reference code already used → new one */
+    else break;
+  }
+  if(!ok){ full.saveError = 'server'; return full; }
+  LILAS_CACHE.appointments.unshift(lilasClone(full));
   return full;
 }
 function lilasUpdateAppointment(id, patch){
-  const list = lilasGetAppointments();
-  const a = list.find(x=>x.id === id);
-  if(!a) return null;
-  Object.assign(a, patch);
-  lilasSetAppointments(list);
-  return a;
+  if(lilasIsAdmin()){
+    const a = LILAS_CACHE.appointments.find(x=>x.id === id);
+    if(!a) return null;
+    Object.assign(a, patch);
+    lilasAsyncReq('PATCH', '/rest/v1/lilas_appointments?id=eq.' + encodeURIComponent(id), lilasApptRow(a),
+      { Prefer:'return=minimal' });
+    return lilasClone(a);
+  }
+  /* visitor: the only allowed change is cancelling their own appointment */
+  const found = LILAS_CACHE.found[id];
+  if(!found || patch.status !== 'annule') return null;
+  const res = lilasSyncReq('POST', '/rest/v1/rpc/lilas_cancel_appointment', { p_ref: found.ref });
+  if(!res.ok || res.data !== true) return null;
+  found.status = 'annule';
+  const i = LILAS_CACHE.appointments.findIndex(x => x.date === found.date && x.time === found.time);
+  if(i > -1) LILAS_CACHE.appointments.splice(i, 1);
+  return lilasClone(found);
 }
 function lilasDeleteAppointment(id){
-  lilasSetAppointments(lilasGetAppointments().filter(x=>x.id !== id));
+  if(!lilasIsAdmin()) return;
+  lilasSetAppointments(LILAS_CACHE.appointments.filter(x=>x.id !== id));
 }
 const LILAS_STATUS = {
   nouveau:  { label:'À confirmer', tone:'new' },
@@ -377,83 +559,9 @@ function lilasWaitEstimate(){
   return { label:'≈ ' + minutes + ' min d\'attente', minutes:minutes, tone: load > .8 ? 'high' : (load > .45 ? 'mid' : 'low') };
 }
 
-/* ================= demo seed (first visit only) ================= */
-function lilasSeedDemo(force){
-  try{
-    if(!force && localStorage.getItem(LILAS_KEYS.seeded)) return false;
-    localStorage.setItem(LILAS_KEYS.seeded, '1');
-  }catch(e){ return false; }
-
-  let seed = 20261021;
-  const rnd = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
-  const pick = a => a[Math.floor(rnd()*a.length)];
-
-  const services = LILAS_DEFAULT_SERVICES;
-  const first = ['Samira','Karim','Nawel','Yacine','Lila','Mohamed','Imene','Farid','Sarah','Riad','Amel','Bilal','Nesrine','Walid','Meriem','Anis'];
-  const last  = ['Benali','Messai','Hadj','Boukhalfa','Slimani','Cherif','Zerrouki','Belaid','Ouali','Taleb','Guerroudj','Lounis','Saidi','Mansouri'];
-  const notes = ['Bilan annuel','Douleurs au ventre depuis 3 jours','Contrôle tension','Prise de sang à jeun','Suivi diabète — HbA1c','Échographie de contrôle','Palpitations occasionnelles','Résultats à retirer','Courbe glycmique','Rendez-vous de prévention'];
-
-  if(!localStorage.getItem(LILAS_KEYS.messages)){
-    const seedMsgs = [
-      { name:'Samira Benali', phone:'0661 22 41 08', service:'Médecine interne et diabète', message:'Bonjour, je souhaite un rendez-vous pour un bilan de suivi du diabète, de préférence en fin de journée.', source:'form' },
-      { name:'Yacine Messai', phone:'0555 78 12 90', service:'Médecin cardiologue', message:'Orientation : Cardiologie. Motif décrit par le patient : « palpitations le soir depuis une semaine ».', source:'assistant' },
-      { name:'Nawel Hadj', phone:'0770 55 63 21', service:'Médecin radiologue', message:'Peut-on passer une échographie abdominale sans rendez-vous le matin ?', source:'form' },
-      { name:'Farid Cherif', phone:'0660 14 90 77', service:'Pharmacienne biologiste', message:'Je viens de faire une prise de sang, sous quel délai vais-je recevoir les résultats ?', source:'form' },
-      { name:'Lila Zerrouki', phone:'0540 33 18 64', service:'Médecin gastrologue', message:'Douleurs gastriques depuis 4 jours après les repas, je préfère être orientée.', source:'assistant' }
-    ];
-    seedMsgs.forEach((m,i)=>{
-      m.id = 'mseed' + i;
-      m.date = new Date(Date.now() - (i*7 + 1) * 3600000 * 5).toISOString();
-      m.read = i > 2;
-    });
-    lilasSetMessages(seedMsgs);
-  }
-
-  if(!localStorage.getItem(LILAS_KEYS.appointments)){
-    const appts = [];
-    const statuses = ['termine','termine','termine','confirme','confirme','nouveau','nouveau','annule'];
-    for(let off = -6; off <= 9; off++){
-      const day = lilasAddDays(lilasToday(), off);
-      const h = lilasHoursFor(day);
-      if(!h) continue;
-      const slots = lilasSlotsFor(day, true).filter(s=>!s.past || off < 0);
-      const n = Math.min(slots.length, 1 + Math.floor(rnd()*4));
-      for(let i=0;i<n;i++){
-        const s = pick(slots);
-        if(!s) break;
-        const svc = pick(services);
-        const member = LILAS_DEFAULT_TEAM.filter(t=>t.serviceId === svc.id)[0];
-        appts.push({
-          id: lilasUid('rdv'),
-          ref: 'LL-' + ['K4P2M','X7T9R','B3N8L','Q5W1D','H2J6C','V9M4K','T8R3F','Z1L7P','N6C2S','Y4G8B'][Math.floor(rnd()*10)] + Math.floor(rnd()*90+10),
-          date: day, time: s.time,
-          name: pick(first) + ' ' + pick(last),
-          phone: '0' + pick(['5','6','7']) + String(Math.floor(rnd()*90000000)+10000000).slice(0,8),
-          email: '',
-          service: svc.title,
-          team: member ? member.name : '',
-          note: pick(notes),
-          reminder: pick(['tel','sms','email']),
-          status: off < 0 ? (rnd() < .85 ? 'termine' : 'annule') : pick(statuses.slice(3)),
-          source: rnd() < .75 ? 'site' : 'admin',
-          createdAt: new Date(Date.now() - (Math.abs(off)+1) * 86400000).toISOString(),
-          demo: true
-        });
-      }
-    }
-    lilasSetAppointments(appts.sort((a,b)=> (b.date+b.time).localeCompare(a.date+a.time)));
-  }
-
-  if(!localStorage.getItem(LILAS_KEYS.activity)){
-    lilasSave(LILAS_KEYS.activity, [
-      { id:lilasUid('a'), date:new Date(Date.now()-3600000*2).toISOString(), text:'3 demandes de rendez-vous reçues depuis le site', kind:'rdv' },
-      { id:lilasUid('a'), date:new Date(Date.now()-3600000*6).toISOString(), text:'Créneau de 10h30 confirmé par téléphone', kind:'rdv' },
-      { id:lilasUid('a'), date:new Date(Date.now()-3600000*20).toISOString(), text:'Spécialité « Médecin urologue » mise à jour', kind:'svc' },
-      { id:lilasUid('a'), date:new Date(Date.now()-3600000*30).toISOString(), text:'Coordonnées du pôle laboratoire modifiées', kind:'contact' }
-    ]);
-  }
-  return true;
-}
+/* ================= demo seed ================= */
+/* Disabled: real data now lives in Supabase. Kept so older page code can still call it. */
+function lilasSeedDemo(){ return false; }
 
 /* ================= csv / file helpers (admin) ================= */
 function lilasToCsv(rows){
@@ -470,19 +578,28 @@ function lilasDownload(filename, content, mime){
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(url), 1500);
 }
+function lilasSetActivityList(list){
+  if(!lilasIsAdmin()) return false;
+  lilasSyncList('lilas_activity', LILAS_CACHE.activity, list, lilasActRow);
+  LILAS_CACHE.activity = lilasClone(list);
+  return true;
+}
 function lilasBackupAll(){
   const dump = { exportedAt: new Date().toISOString() };
-  [LILAS_KEYS.services, LILAS_KEYS.contact, LILAS_KEYS.messages, LILAS_KEYS.appointments,
-   LILAS_KEYS.team, LILAS_KEYS.settings, LILAS_KEYS.activity].forEach(k=>{
-    try{ dump[k] = JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ dump[k] = null; }
+  [LILAS_KEYS.services, LILAS_KEYS.contact, LILAS_KEYS.team, LILAS_KEYS.settings].forEach(k=>{
+    dump[k] = LILAS_CACHE.kv[k] === undefined ? null : LILAS_CACHE.kv[k];
   });
+  dump[LILAS_KEYS.appointments] = LILAS_CACHE.appointments;
+  dump[LILAS_KEYS.messages] = LILAS_CACHE.messages;
+  dump[LILAS_KEYS.activity] = LILAS_CACHE.activity;
   return JSON.stringify(dump, null, 2);
 }
 function lilasRestoreAll(json){
   const dump = JSON.parse(json);
-  Object.keys(dump).forEach(k=>{
-    if(k === 'exportedAt') return;
-    if(dump[k] === null || dump[k] === undefined) return;
-    localStorage.setItem(k, JSON.stringify(dump[k]));
+  [LILAS_KEYS.services, LILAS_KEYS.contact, LILAS_KEYS.team, LILAS_KEYS.settings].forEach(k=>{
+    if(dump[k] !== null && dump[k] !== undefined) lilasSave(k, dump[k]);
   });
+  if(Array.isArray(dump[LILAS_KEYS.appointments])) lilasSetAppointments(dump[LILAS_KEYS.appointments]);
+  if(Array.isArray(dump[LILAS_KEYS.messages])) lilasSetMessages(dump[LILAS_KEYS.messages]);
+  if(Array.isArray(dump[LILAS_KEYS.activity])) lilasSetActivityList(dump[LILAS_KEYS.activity]);
 }

@@ -1,0 +1,20 @@
+/* =========================================================
+   Hero background pan: slow left → right drift, PHONES ONLY
+   Load this AFTER styles.css (see the <link> line in the note).
+   Layers of .hero background: 1) dark tint  2) top fade  3) the photo
+   Only the photo (3rd value) moves.
+   ========================================================= */
+@media (max-width:760px){
+  .hero{
+    background-position:0 0, 0 0, 30% center;
+    animation:heroPan 40s ease-in-out infinite alternate;
+  }
+  @keyframes heroPan{
+    from{background-position:0 0, 0 0, 30% center;}
+    to  {background-position:0 0, 0 0, 100% center;}
+  }
+}
+/* respect "reduce motion" settings: keep the photo still */
+@media (max-width:760px) and (prefers-reduced-motion:reduce){
+  .hero{animation:none;background-position:0 0, 0 0, 70% center;}
+}
